@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="社労士過去問">
+<meta name="theme-color" content="#1a1613">
+<title>社労士過去問</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #f5f1ea; --bg-deep: #ebe4d6; --ink: #1a1613; --ink-soft: #5a5047; --ink-faint: #8a7d6f;
+  --line: #d9cfbd; --paper: #faf6ef; --accent: #8b2e2e; --accent-soft: #a84242;
+  --correct: #3d6e4a; --wrong: #8b2e2e; --gold: #b8935a; --pin: #c9a961; --flag: #c9772e;
+}
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body {
+  font-family: 'Zen Kaku Gothic New', sans-serif; background: var(--bg); color: var(--ink);
+  font-size: 15px; line-height: 1.7;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-font-smoothing: antialiased; letter-spacing: 0.02em;
+}
+.mincho { font-family: 'Shippori Mincho', serif; }
+#app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; max-width: 520px; margin: 0 auto; position: relative; }
+.screen { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+
+header { padding: 16px 22px 12px; border-bottom: 1px solid var(--line); background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; }
+header .title { font-family: 'Shippori Mincho', serif; font-size: 18px; font-weight: 600; letter-spacing: 0.1em; }
+header .title::before { content: "◆ "; color: var(--accent); font-size: 0.8em; }
+header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.25em; margin-top: 2px; }
+
+.home-content { flex: 1; overflow-y: auto; padding: 20px 22px 40px; -webkit-overflow-scrolling: touch; }
+.hero { text-align: center; padding: 14px 0 22px; border-bottom: 1px solid var(--line); margin-bottom: 18px; position: relative; }
+.hero::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 40px; height: 3px; background: var(--accent); }
+.hero-kanji { font-family: 'Shippori Mincho', serif; font-size: 36px; font-weight: 700; letter-spacing: 0.18em; color: var(--ink); margin-bottom: 4px; }
+.hero-sub { font-size: 10px; letter-spacing: 0.4em; color: var(--ink-faint); }
+
+.year-tabs { display: flex; gap: 6px; margin-bottom: 16px; padding: 3px; background: var(--paper); border: 1px solid var(--line); }
+.year-tab { flex: 1; padding: 8px; background: transparent; border: none; font-family: 'Shippori Mincho', serif; font-size: 12px; letter-spacing: 0.1em; cursor: pointer; color: var(--ink-soft); }
+.year-tab.active { background: var(--ink); color: var(--bg); }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; border: 1px solid var(--line); background: var(--paper); }
+.stat { padding: 11px 4px; text-align: center; border-right: 1px solid var(--line); }
+.stat:last-child { border-right: none; }
+.stat-num { font-family: 'Shippori Mincho', serif; font-size: 20px; font-weight: 600; color: var(--ink); line-height: 1; margin-bottom: 3px; }
+.stat-label { font-size: 9px; letter-spacing: 0.1em; color: var(--ink-faint); }
+
+.section-label { font-size: 11px; letter-spacing: 0.3em; color: var(--ink-faint); margin-bottom: 10px; padding-left: 8px; border-left: 2px solid var(--accent); display: flex; align-items: center; justify-content: space-between; }
+.section-label .hint { font-size: 9px; color: var(--ink-faint); letter-spacing: 0.1em; }
+
+.mode-tabs { display: flex; background: var(--paper); border: 1px solid var(--line); margin-bottom: 18px; padding: 3px; gap: 2px; }
+.mode-tab { flex: 1; padding: 10px 4px; background: transparent; border: none; font-family: 'Shippori Mincho', serif; font-size: 12.5px; letter-spacing: 0.08em; cursor: pointer; color: var(--ink-soft); }
+.mode-tab.active { background: var(--ink); color: var(--bg); }
+.mode-tab .tab-sub { display: block; font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 8.5px; letter-spacing: 0.15em; margin-top: 2px; opacity: 0.7; }
+.mode-panel { display: none; }
+.mode-panel.active { display: block; }
+
+.subject-list { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 20px; }
+.subject-item { background: var(--paper); padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.15s; }
+.subject-item:active { background: var(--bg-deep); }
+.subject-item.disabled { opacity: 0.45; cursor: not-allowed; }
+.subject-item.disabled:active { background: var(--paper); }
+.subject-name { font-family: 'Shippori Mincho', serif; font-size: 14.5px; font-weight: 500; }
+.subject-meta { display: flex; align-items: center; gap: 9px; }
+.subject-count { font-size: 11px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.subject-progress { width: 40px; height: 3px; background: var(--bg-deep); position: relative; }
+.subject-progress::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); width: var(--p, 0%); }
+.chevron { color: var(--ink-faint); font-size: 14px; }
+.badge-soon { font-size: 9px; letter-spacing: 0.1em; color: var(--ink-faint); border: 1px solid var(--line); padding: 2px 6px; background: var(--bg-deep); }
+.badge-best { font-size: 10px; letter-spacing: 0.05em; color: var(--accent); font-family: 'Shippori Mincho', serif; font-weight: 600; }
+
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.mode-btn { background: var(--paper); border: 1px solid var(--line); padding: 14px 12px; text-align: left; cursor: pointer; font-family: inherit; color: inherit; transition: all 0.15s; }
+.mode-btn:active { background: var(--bg-deep); transform: scale(0.98); }
+.mode-icon { font-family: 'Shippori Mincho', serif; font-size: 19px; color: var(--accent); margin-bottom: 2px; display: block; }
+.mode-title { font-size: 12.5px; font-weight: 500; margin-bottom: 2px; }
+.mode-desc { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.05em; }
+
+.exam-note { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 11px 13px; font-size: 11.5px; line-height: 1.75; color: var(--ink-soft); margin-bottom: 16px; }
+.exam-note .nt { font-family: 'Shippori Mincho', serif; color: var(--accent); font-size: 10.5px; letter-spacing: 0.2em; display: block; margin-bottom: 3px; }
+
+/* Quiz 一問一答 */
+.quiz-header { padding: 11px 18px; border-bottom: 1px solid var(--line); background: var(--bg); display: flex; align-items: center; gap: 11px; flex-shrink: 0; }
+.quiz-back { background: none; border: none; font-size: 22px; color: var(--ink-soft); cursor: pointer; padding: 4px 8px; margin-left: -8px; line-height: 1; }
+.progress-bar { flex: 1; height: 3px; background: var(--bg-deep); position: relative; overflow: hidden; }
+.progress-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); transition: width 0.3s; }
+.quiz-counter { font-family: 'Shippori Mincho', serif; font-size: 13px; color: var(--ink-soft); min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+.bookmark-btn, .flag-btn { background: none; border: none; font-size: 20px; color: var(--ink-faint); cursor: pointer; padding: 4px 6px; line-height: 1; transition: color 0.15s; }
+.bookmark-btn.active { color: var(--pin); }
+.flag-btn.active { color: var(--flag); }
+
+.quiz-body { flex: 1; overflow-y: auto; padding: 16px 22px 130px; -webkit-overflow-scrolling: touch; }
+.meta-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.tag { font-size: 10px; letter-spacing: 0.12em; padding: 3px 9px; border: 1px solid var(--line); color: var(--ink-soft); background: var(--paper); }
+.tag.accent { border-color: var(--accent); color: var(--accent); }
+.question-context { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--ink-faint); padding: 10px 14px; margin-bottom: 14px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.75; }
+.question-context-label { font-size: 10px; letter-spacing: 0.25em; color: var(--ink-faint); margin-bottom: 4px; }
+.question-text { font-family: 'Shippori Mincho', serif; font-size: 16px; line-height: 1.9; margin-bottom: 20px; padding: 4px 0 18px; border-bottom: 1px dashed var(--line); letter-spacing: 0.03em; }
+.question-text::before { content: "問"; display: inline-block; font-size: 12px; background: var(--ink); color: var(--bg); padding: 3px 8px; margin-right: 10px; vertical-align: middle; letter-spacing: 0; font-family: 'Zen Kaku Gothic New', sans-serif; }
+.answer-area { display: flex; gap: 10px; margin-bottom: 18px; }
+.answer-btn { flex: 1; padding: 20px 0; background: var(--paper); border: 1px solid var(--line); font-family: 'Shippori Mincho', serif; font-size: 26px; cursor: pointer; transition: all 0.15s; color: var(--ink); }
+.answer-btn:active:not(:disabled) { transform: scale(0.97); background: var(--bg-deep); }
+.answer-btn[data-value="true"] .sym { color: var(--correct); }
+.answer-btn[data-value="false"] .sym { color: var(--wrong); }
+.answer-btn .sym { display: block; font-size: 30px; line-height: 1; margin-bottom: 4px; }
+.answer-btn .lbl { font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2em; }
+.answer-btn.correct-choice { background: #eaf0ea; border-color: var(--correct); border-width: 2px; }
+.answer-btn.wrong-choice { background: #f0e8e8; border-color: var(--wrong); border-width: 2px; }
+.answer-btn:disabled { cursor: default; }
+.answer-btn.correct-choice:disabled, .answer-btn.wrong-choice:disabled { opacity: 1; }
+
+.result-panel { background: var(--paper); border: 1px solid var(--line); padding: 16px; margin-bottom: 14px; display: none; }
+.result-panel.show { display: block; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.result-verdict { font-family: 'Shippori Mincho', serif; font-size: 17px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: baseline; gap: 10px; }
+.result-verdict.ok { color: var(--correct); } .result-verdict.ng { color: var(--wrong); }
+.result-verdict small { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-faint); font-weight: 400; }
+.result-answer { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.result-answer strong { font-family: 'Shippori Mincho', serif; font-size: 14px; color: var(--ink); }
+.explanation-label { font-size: 10px; letter-spacing: 0.3em; color: var(--ink-faint); margin-bottom: 7px; }
+.explanation { font-size: 13.5px; line-height: 1.85; color: var(--ink); margin-bottom: 12px; }
+.reference { font-family: 'Shippori Mincho', serif; font-size: 12px; color: var(--accent); padding-top: 10px; border-top: 1px dashed var(--line); letter-spacing: 0.05em; }
+.reference::before { content: "§ "; }
+
+.next-btn, .submit-btn { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: calc(100% - 44px); max-width: 476px; padding: 15px; background: var(--ink); color: var(--bg); border: none; font-family: 'Shippori Mincho', serif; font-size: 14px; letter-spacing: 0.25em; cursor: pointer; display: none; box-shadow: 0 4px 20px rgba(26, 22, 19, 0.15); }
+.next-btn.show, .submit-btn.show { display: block; animation: slideUp 0.3s ease; }
+.next-btn:active { background: var(--accent); }
+.submit-btn { background: var(--accent); }
+.submit-btn:active { background: var(--ink); }
+
+/* Exam 試験モード */
+.exam-header { padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--bg); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.exam-timer { font-family: 'Shippori Mincho', serif; font-size: 16px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: 0.1em; }
+.exam-num-btn { background: var(--paper); border: 1px solid var(--line); padding: 5px 10px; font-size: 11px; letter-spacing: 0.1em; font-family: 'Shippori Mincho', serif; cursor: pointer; color: var(--ink-soft); }
+.exam-num-btn:active { background: var(--bg-deep); }
+
+.exam-body { flex: 1; overflow-y: auto; padding: 16px 22px 130px; -webkit-overflow-scrolling: touch; }
+.exam-q-title { font-family: 'Shippori Mincho', serif; font-size: 14px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
+.exam-q-instruction { font-family: 'Shippori Mincho', serif; font-size: 15px; line-height: 1.85; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px dashed var(--line); letter-spacing: 0.03em; }
+
+.choice-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.choice-item { background: var(--paper); border: 1px solid var(--line); padding: 13px 13px 13px 42px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-size: 13.5px; line-height: 1.8; text-align: left; color: var(--ink); position: relative; letter-spacing: 0.02em; transition: all 0.12s; word-break: break-word; width: 100%; }
+.choice-item:active { background: var(--bg-deep); }
+.choice-item .choice-label { position: absolute; top: 13px; left: 13px; width: 21px; height: 21px; border: 1.5px solid var(--ink-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--ink-soft); transition: all 0.12s; }
+.choice-item.selected { border-color: var(--ink); border-width: 2px; background: #fdfbf6; padding: 12px 12px 12px 41px; }
+.choice-item.selected .choice-label { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.choice-item.correct-answer { border-color: var(--correct); border-width: 2px; padding: 12px 12px 12px 41px; background: #f0f5f0; }
+.choice-item.correct-answer .choice-label { background: var(--correct); color: white; border-color: var(--correct); }
+.choice-item.wrong-selected { border-color: var(--wrong); border-width: 2px; padding: 12px 12px 12px 41px; background: #f5eded; }
+.choice-item.wrong-selected .choice-label { background: var(--wrong); color: white; border-color: var(--wrong); }
+.choice-explain { font-size: 12px; color: var(--ink-soft); line-height: 1.75; margin-top: 10px; padding: 10px 12px; background: rgba(255,255,255,0.5); border-left: 2px solid var(--line); display: none; }
+.choice-explain.show { display: block; }
+
+.exam-nav { display: flex; gap: 8px; margin-top: 12px; }
+.exam-nav-btn { flex: 1; padding: 11px; background: var(--paper); border: 1px solid var(--line); font-family: 'Shippori Mincho', serif; font-size: 13px; letter-spacing: 0.1em; cursor: pointer; color: var(--ink); }
+.exam-nav-btn:active { background: var(--bg-deep); }
+.exam-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.exam-nav-btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* 選択式モード */
+.sentaku-body { flex: 1; overflow-y: auto; padding: 16px 22px 130px; -webkit-overflow-scrolling: touch; }
+.sentaku-text { font-family: 'Shippori Mincho', serif; font-size: 15px; line-height: 2.2; letter-spacing: 0.03em; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed var(--line); }
+.blank-slot {
+  display: inline-block; min-width: 60px; padding: 2px 10px; margin: 0 2px;
+  border: 1.5px solid var(--line); background: var(--paper);
+  font-family: 'Shippori Mincho', serif; font-size: 13.5px; color: var(--ink-soft);
+  cursor: pointer; position: relative; border-radius: 3px; transition: all 0.15s;
+  text-align: center; vertical-align: middle;
+}
+.blank-slot.filled { background: #fdfbf6; color: var(--ink); border-color: var(--ink); border-width: 2px; padding: 1px 9px; }
+.blank-slot.active { border-color: var(--accent); background: #fffbf6; box-shadow: 0 0 0 3px rgba(139, 46, 46, 0.15); }
+.blank-slot.correct { border-color: var(--correct); background: #f0f5f0; color: var(--correct); }
+.blank-slot.wrong { border-color: var(--wrong); background: #f5eded; color: var(--wrong); }
+.blank-label { position: absolute; top: -14px; left: 0; font-size: 10px; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; }
+
+.sentaku-choices-wrap { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 10px 0; margin: 0 -22px; }
+.sentaku-choices-label { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2em; margin: 0 22px 8px; display: flex; justify-content: space-between; }
+.sentaku-choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; padding: 0 22px; max-height: 220px; overflow-y: auto; }
+.sentaku-choice { background: var(--paper); border: 1px solid var(--line); padding: 8px 10px 8px 28px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-size: 12px; line-height: 1.5; text-align: left; color: var(--ink); position: relative; }
+.sentaku-choice:active { background: var(--bg-deep); }
+.sentaku-choice.used { opacity: 0.35; cursor: not-allowed; }
+.sentaku-choice.correct-hint { border-color: var(--correct); background: #f0f5f0; }
+.sentaku-choice .sc-num { position: absolute; top: 7px; left: 7px; width: 18px; height: 18px; border: 1px solid var(--ink-soft); border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; color: var(--ink-soft); }
+
+/* Overview modal */
+.overlay { position: fixed; inset: 0; background: rgba(26, 22, 19, 0.5); display: none; align-items: flex-end; z-index: 100; animation: fadeIn 0.2s ease; }
+.overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.sheet { background: var(--bg); width: 100%; max-width: 520px; margin: 0 auto; border-radius: 14px 14px 0 0; max-height: 82vh; display: flex; flex-direction: column; animation: slideUpSheet 0.25s ease; padding-bottom: env(safe-area-inset-bottom); }
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-handle { width: 40px; height: 4px; background: var(--line); border-radius: 2px; margin: 10px auto 4px; }
+.sheet-header { padding: 14px 22px 10px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.sheet-title { font-family: 'Shippori Mincho', serif; font-size: 15px; letter-spacing: 0.1em; }
+.sheet-close { background: none; border: none; font-size: 18px; color: var(--ink-soft); cursor: pointer; padding: 4px 8px; }
+.sheet-body { flex: 1; overflow-y: auto; padding: 18px 22px; }
+.q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 18px; }
+.q-cell { aspect-ratio: 1; background: var(--paper); border: 1px solid var(--line); font-family: 'Shippori Mincho', serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; color: var(--ink-soft); }
+.q-cell:active { background: var(--bg-deep); }
+.q-cell.answered { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.q-cell.current { outline: 2px solid var(--accent); outline-offset: -2px; }
+.q-cell.flagged::after { content: "▲"; position: absolute; top: 2px; right: 3px; font-size: 7px; color: var(--flag); }
+.legend { display: flex; gap: 14px; font-size: 10.5px; color: var(--ink-soft); flex-wrap: wrap; padding-top: 14px; border-top: 1px dashed var(--line); }
+.legend span { display: flex; align-items: center; gap: 5px; }
+.legend .dot { width: 10px; height: 10px; border: 1px solid var(--line); display: inline-block; }
+.legend .dot.answered { background: var(--ink); border-color: var(--ink); }
+
+/* Complete */
+.complete-body { flex: 1; overflow-y: auto; padding: 26px 24px 40px; text-align: center; -webkit-overflow-scrolling: touch; }
+#complete .complete-body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.complete-seal { width: 100px; height: 100px; border: 3px double var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-family: 'Shippori Mincho', serif; color: var(--accent); font-size: 28px; font-weight: 600; transform: rotate(-8deg); letter-spacing: 0.05em; }
+.complete-title { font-family: 'Shippori Mincho', serif; font-size: 20px; margin-bottom: 4px; letter-spacing: 0.15em; }
+.complete-score { font-family: 'Shippori Mincho', serif; font-size: 48px; font-weight: 600; color: var(--accent); margin: 12px 0 2px; line-height: 1; }
+.complete-score small { font-size: 18px; color: var(--ink-faint); font-weight: 400; }
+.complete-detail { font-size: 12px; color: var(--ink-faint); letter-spacing: 0.2em; margin-bottom: 24px; }
+.complete-time { font-family: 'Shippori Mincho', serif; font-size: 13px; color: var(--ink-soft); margin-bottom: 20px; letter-spacing: 0.1em; }
+
+.result-table { background: var(--paper); border: 1px solid var(--line); margin: 0 0 22px; text-align: left; width: 100%; }
+.result-row { display: grid; grid-template-columns: 52px 56px 1fr 32px; align-items: center; padding: 10px 13px; border-bottom: 1px solid var(--line); gap: 10px; font-size: 12px; }
+.result-row:last-child { border-bottom: none; }
+.result-row.header { background: var(--bg-deep); font-family: 'Shippori Mincho', serif; font-size: 10px; letter-spacing: 0.15em; color: var(--ink-faint); padding: 7px 13px; }
+.result-row .rq { font-family: 'Shippori Mincho', serif; font-weight: 600; }
+.result-row .rans { font-family: 'Shippori Mincho', serif; text-align: center; color: var(--ink-soft); font-size: 11.5px; }
+.result-row .rcor { font-family: 'Shippori Mincho', serif; text-align: center; font-weight: 600; }
+.result-row .rcor.ok { color: var(--correct); }
+.result-row .rcor.ng { color: var(--wrong); }
+.result-row .rcor.skip { color: var(--ink-faint); }
+.result-row.clickable { cursor: pointer; }
+.result-row.clickable:active { background: var(--bg-deep); }
+
+.complete-actions { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto; }
+.complete-btn { padding: 13px; font-family: 'Shippori Mincho', serif; font-size: 13px; letter-spacing: 0.2em; cursor: pointer; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); }
+.complete-btn.secondary { background: transparent; color: var(--ink); }
+
+.footnote { padding: 11px 22px; text-align: center; font-size: 9.5px; color: var(--ink-faint); letter-spacing: 0.18em; border-top: 1px solid var(--line); flex-shrink: 0; }
+.loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; color: var(--ink-soft); font-family: 'Shippori Mincho', serif; }
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="screen active" id="home">
+    <header>
+      <div>
+        <div class="title mincho">社労士過去問</div>
+        <div class="subtitle">SHAROUSHI KAKOMON</div>
+      </div>
+    </header>
+    <div class="home-content" id="homeContent"><div class="loading mincho">準備中…</div></div>
+    <div class="footnote" id="footnote">過去問データは年度を切り替えて使用可</div>
+  </section>
+
+  <section class="screen" id="quiz">
+    <div class="quiz-header">
+      <button class="quiz-back" onclick="goHome()">←</button>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="quiz-counter mincho" id="counter">1 / 10</div>
+      <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">☆</button>
+    </div>
+    <div class="quiz-body" id="quizBody"></div>
+    <button class="next-btn mincho" id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
+  </section>
+
+  <section class="screen" id="exam">
+    <div class="exam-header">
+      <button class="quiz-back" onclick="confirmExitExam()">←</button>
+      <div class="exam-timer mincho" id="examTimer">00:00</div>
+      <div style="flex:1"></div>
+      <button class="flag-btn" id="examFlagBtn" onclick="toggleExamFlag()">△</button>
+      <button class="exam-num-btn mincho" onclick="openExamOverview()" id="examProgressBtn">一覧</button>
+    </div>
+    <div class="exam-body" id="examBody"></div>
+    <button class="submit-btn mincho" id="examSubmitBtn" onclick="confirmSubmitExam()">採点する</button>
+  </section>
+
+  <section class="screen" id="sentaku">
+    <div class="exam-header">
+      <button class="quiz-back" onclick="confirmExitSentaku()">←</button>
+      <div class="exam-timer mincho" id="sentakuTimer">00:00</div>
+      <div style="flex:1"></div>
+      <button class="exam-num-btn mincho" onclick="openSentakuOverview()" id="sentakuProgressBtn">一覧</button>
+    </div>
+    <div class="sentaku-body" id="sentakuBody"></div>
+    <button class="submit-btn mincho" id="sentakuSubmitBtn" onclick="confirmSubmitSentaku()">採点する</button>
+  </section>
+
+  <div class="overlay" id="examOverlay" onclick="closeExamOverview(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title mincho">解答状況</div>
+        <button class="sheet-close" onclick="closeExamOverview()">×</button>
+      </div>
+      <div class="sheet-body">
+        <div class="q-grid" id="examGrid"></div>
+        <div class="legend">
+          <span><span class="dot"></span>未解答</span>
+          <span><span class="dot answered"></span>解答済</span>
+          <span>▲ 見直し</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="sentakuOverlay" onclick="closeSentakuOverview(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title mincho">解答状況</div>
+        <button class="sheet-close" onclick="closeSentakuOverview()">×</button>
+      </div>
+      <div class="sheet-body">
+        <div class="q-grid" id="sentakuGrid"></div>
+        <div class="legend">
+          <span><span class="dot"></span>未解答</span>
+          <span><span class="dot answered"></span>解答済</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="screen" id="complete">
+    <header>
+      <div>
+        <div class="title mincho">結果</div>
+        <div class="subtitle">RESULT</div>
+      </div>
+    </header>
+    <div class="complete-body">
+      <div class="complete-seal mincho" id="sealText">合格</div>
+      <div class="complete-title mincho">演習終了</div>
+      <div class="complete-score mincho"><span id="finalScore">0</span><small> / <span id="finalTotal">0</span></small></div>
+      <div class="complete-detail" id="finalRate">正答率 —%</div>
+      <div class="complete-actions">
+        <button class="complete-btn" onclick="goHome()">ホームへ戻る</button>
+        <button class="complete-btn secondary" onclick="retryWrong()">間違えた問題を復習</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="examResult">
+    <header style="justify-content: flex-start; gap: 14px;">
+      <button class="quiz-back" onclick="goHome()" style="margin-left: -4px;">←</button>
+      <div>
+        <div class="title mincho">採点結果</div>
+        <div class="subtitle" id="examResultSub">EXAM RESULT</div>
+      </div>
+    </header>
+    <div class="complete-body" id="examResultBody"></div>
+  </section>
+</div>
+
+<script>
+// =================================
+// DATA
+// =================================
+const SUBJECTS = [
+  { id: "roki-anei", name: "労基法・安衛法" },
+  { id: "rousai", name: "労災保険法・徴収法" },
+  { id: "koyou", name: "雇用保険法・徴収法" },
+  { id: "ippan", name: "労一・社一" },
+  { id: "kenpo", name: "健康保険法" },
+  { id: "kounen", name: "厚生年金保険法" },
+  { id: "kokunen", name: "国民年金法" }
+];
+
+const YEARS = [
+  { id: "r6", name: "令和6年度", short: "R6", full: "第56回（令和6年度）" },
+  { id: "r5", name: "令和5年度", short: "R5", full: "第55回（令和5年度）" }
+];
+
+// 問題データ - 別オブジェクトで管理
+const DATA = {
+  r5: {
+    exams: window.R5_EXAMS || [],
+    questions: window.R5_QUESTIONS || [],
+    sentaku: window.R5_SENTAKU || []
+  },
+  r6: {
+    exams: [],
+    questions: [],
+    sentaku: []
+  }
+};
+
+// R5 データ（労基・安衛 問1〜問3）
+DATA.r5.exams = [
+  {
+    id: "r5-roki-1", subject: "roki-anei", subjectName: "労基法・安衛法", qNumber: "問1", year: "R5",
+    instruction: "下記のとおり賃金を支払われている労働者が使用者の責に帰すべき事由により半日休業した場合、労働基準法第26条の休業手当に関する次の記述のうち、正しいものはどれか。\n\n賃金：日給1日10,000円\n半日休業とした日の賃金は、半日分の5,000円が支払われた。\n平均賃金：7,000円",
+    choices: [
+      { label: "A", text: "使用者は、以下の算式により2,000円の休業手当を支払わなければならない。7,000円 − 5,000円 = 2,000円", correct: false, explain: "平均賃金満額との差額を支払う規定ではない。休業手当は平均賃金の60%以上（労基法26条）。" },
+      { label: "B", text: "半日は出勤し労働に従事させており、労働基準法第26条の休業には該当しないから、使用者は同条の休業手当ではなく通常の1日分の賃金10,000円を支払わなければならない。", correct: false, explain: "1日の一部のみの休業も26条の休業に該当する（昭27.8.7基収3445号）。" },
+      { label: "C", text: "使用者は、以下の算式により1,000円の休業手当を支払わなければならない。10,000円 × 0.6 − 5,000円 = 1,000円", correct: false, explain: "休業手当の計算の基礎は平均賃金であり、日給ではない。本問では平均賃金7,000円を使う。" },
+      { label: "D", text: "使用者は、以下の算式により1,200円の休業手当を支払わなければならない。（7,000円 − 5,000円）× 0.6 = 1,200円", correct: false, explain: "平均賃金から既支給額を引いた残額に0.6を掛ける条文上の根拠はない。" },
+      { label: "E", text: "使用者が休業手当として支払うべき金額は発生しない。", correct: true, explain: "半日休業でも1日単位で判断し、平均賃金7,000円×60%＝4,200円が保障額。すでに5,000円支給済で保障額を上回るため追加の休業手当は発生しない（昭27.8.7基収3445号）。" }
+    ],
+    correctLabel: "E",
+    reference: "労働基準法 第26条／昭27.8.7基収3445号"
+  },
+  {
+    id: "r5-roki-2", subject: "roki-anei", subjectName: "労基法・安衛法", qNumber: "問2", year: "R5",
+    instruction: "労働基準法第34条に定める休憩時間に関する次のアからオの記述のうち、正しいものの組合せは、後記AからEまでのうちどれか。\n\nア 休憩時間は、原則として一斉に与えなければならないとされているが、道路による貨物の運送の事業、倉庫における貨物の取扱いの事業には、この規定は適用されない。\n\nイ 一昼夜交替制勤務は労働時間の延長ではなく二日間の所定労働時間を継続して勤務する場合であるから、1日の所定労働時間に対して1時間以上の休憩を与えるべきものと解して、2時間以上の休憩時間を労働時間の途中に与えなければならないとされている。\n\nウ 休憩時間中の外出について所属長の許可を受けさせるのは、事業場内において自由に休息し得る場合には必ずしも第3項（休憩時間の自由利用）に違反しない。\n\nエ 第1項に定める「6時間を超える場合においては少くとも45分」とは、一勤務の実労働時間の総計が6時間を超え8時間までの場合は、その労働時間の途中に少なくとも45分の休憩を与えなければならないという意味であり、休憩時間の置かれる位置は問わない。\n\nオ 工場の事務所において、昼食休憩時間に来客当番として待機させた場合、結果的に来客が1人もなかったとしても、休憩時間を与えたことにはならない。",
+    choices: [
+      { label: "A", text: "（アとイとウ）", correct: false, explain: "ア×イ×。倉庫業は一斉休憩除外に該当せず、一昼夜交替制で「2時間以上」の要件はない。" },
+      { label: "B", text: "（アとイとエ）", correct: false, explain: "アとイが誤り。" },
+      { label: "C", text: "（アとエとオ）", correct: false, explain: "アが誤り（倉庫業は一斉付与の除外ではない）。" },
+      { label: "D", text: "（イとウとオ）", correct: false, explain: "イが誤り（一昼夜交替制に「2時間以上」の要件はない）。" },
+      { label: "E", text: "（ウとエとオ）", correct: true, explain: "ウ○エ○オ○が正解。" }
+    ],
+    correctLabel: "E",
+    reference: "労働基準法 第34条・第40条／労基則第31条"
+  },
+  {
+    id: "r5-roki-3", subject: "roki-anei", subjectName: "労基法・安衛法", qNumber: "問3", year: "R5",
+    instruction: "労働基準法の年少者及び妊産婦等に係る規定に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "年少者を坑内で労働させてはならないが、年少者でなくても、妊娠中の女性及び坑内で行われる業務に従事しない旨を使用者に申し出た女性については、坑内で行われるすべての業務に就かせてはならない。", correct: true, explain: "誤り（正解肢）。申出をした者は「人力による掘削業務等」に限り禁止で、すべての業務ではない。" },
+      { label: "B", text: "女性労働者が妊娠中絶を行った場合、産前6週間の休業の問題は発生しないが、妊娠4か月以後行った場合には、産後の休業について定めた労基法65条2項の適用がある。", correct: false, explain: "正しい。妊娠4か月（85日）以上の中絶は「出産」扱いで産後8週間の休業規定が適用。" },
+      { label: "C", text: "6週間以内に出産する予定の女性労働者が休業を請求せず引き続き就業している場合は、労基法19条の解雇制限期間にはならないが、行政指導は行われる。", correct: false, explain: "正しい（昭26.3.13基収587号）。" },
+      { label: "D", text: "災害等による臨時の必要がある場合の時間外労働等を規定した労基法33条1項は年少者にも適用されるが、妊産婦が請求した場合には、同項を適用して時間外労働等をさせることはできない。", correct: false, explain: "正しい（労基法66条）。" },
+      { label: "E", text: "年少者の深夜業・危険有害業務・坑内労働の禁止は、条文上の表現は異なるが、すべて現実に労働させることを禁止する趣旨である。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "A",
+    reference: "労働基準法 第64条の2／女性労働基準規則 第1条"
+  }
+];
+
+// R5 一問一答
+DATA.r5.questions = [];
+DATA.r5.exams.forEach(e => {
+  e.choices.forEach(c => {
+    const isCorrectAnswer = (c.label === e.correctLabel);
+    const qType = e.instruction.includes("正しいもの") ? "正しいもの" : (e.instruction.includes("誤っている") ? "誤っているもの" : "");
+    let ansBool = c.correct;
+    DATA.r5.questions.push({
+      id: `${e.id}-${c.label.toLowerCase()}`,
+      subject: e.subject, subjectName: e.subjectName, qNumber: e.qNumber, choice: c.label, year: e.year,
+      context: null, // 一問一答は肢単独で判定
+      question: c.text,
+      answer: ansBool,
+      explanation: (ansBool ? "正しい。" : "誤り。") + (c.explain || ""),
+      reference: e.reference
+    });
+  });
+});
+
+// ===== R6 データ =====
+// 労災 問1〜問10（択一式）
+DATA.r6.exams = [
+  {
+    id: "r6-rousai-1", subject: "rousai", subjectName: "労災・徴収", qNumber: "問1", year: "R6",
+    instruction: "労災保険法第7条に規定する通勤の途中で合理的経路を逸脱・中断した場合でも、当該逸脱・中断が日常生活上必要な行為であって、厚生労働省令で定めるものをやむを得ない事由により最小限度の範囲で行う場合には、当該逸脱・中断の後、合理的な経路に復した後は、同条の通勤と認められることとされている。\nこの日常生活上必要な行為として、同法施行規則第8条が定めるものに含まれない行為はどれか。",
+    choices: [
+      { label: "A", text: "経路の近くにある公衆トイレを使用する行為", correct: true, explain: "正解肢。施行規則8条が定める「日常生活上必要な行為」には該当しない。これは逸脱・中断にあたらない「ささいな行為」として扱われ、その間も通勤と認められる。" },
+      { label: "B", text: "帰途で惣菜等を購入する行為", correct: false, explain: "施行規則8条1号の「日用品の購入その他これに準ずる行為」に該当する。" },
+      { label: "C", text: "はり師による施術を受ける行為", correct: false, explain: "施行規則8条3号の「診察または治療を受ける行為その他これに準ずる行為」に該当する。" },
+      { label: "D", text: "職業能力開発校で職業訓練を受ける行為", correct: false, explain: "施行規則8条2号の「職業訓練、学校教育その他これらに準ずる教育訓練」に該当する。" },
+      { label: "E", text: "要介護状態にある兄弟姉妹の介護を継続的に又は反復して行う行為", correct: false, explain: "施行規則8条5号の要介護状態にある親族等の介護に該当する。" }
+    ],
+    correctLabel: "A",
+    reference: "労災保険法 第7条／労災保険法施行規則 第8条"
+  },
+  {
+    id: "r6-rousai-2", subject: "rousai", subjectName: "労災・徴収", qNumber: "問2", year: "R6",
+    instruction: "通勤災害に関する次の記述のうち、正しいものはどれか。",
+    choices: [
+      { label: "A", text: "マイカー通勤をしている労働者が、勤務先会社から市道を挟んだところにある同社の駐車場に車を停車し、徒歩で職場に到着しタイムカードを打刻した後、フォグライトの消し忘れに気づき、徒歩で駐車場へ引き返すべく市道を横断する途中、市道を走ってきた軽自動車にはねられ負傷した場合、通勤災害とは認められない。", correct: false, explain: "通勤災害と認められる。タイムカード打刻後であっても、会社敷地外の市道横断中の事故は「退勤途中の合理的経路」上の災害として通勤災害となる。" },
+      { label: "B", text: "マイカー通勤をしている労働者が、同一方向にある配偶者の勤務先を経由するため、通常通り自分の勤務先を通り越して通常の通勤経路を450メートル走行し、配偶者の勤務先で配偶者を下車させて自分の勤務先に向かって走行中、踏切で鉄道車両と衝突して負傷した場合、通勤災害とは認められない。", correct: false, explain: "通勤災害と認められる。450メートル程度の逸脱は合理的経路の範囲内とされる事例。" },
+      { label: "C", text: "頸椎を手術した配偶者の看護のため、手術後1か月ほど姑と交替で1日おきに病院に寝泊まりしていた労働者が、当該病院から徒歩で出勤する途中、横断歩道で軽自動車にはねられ負傷した場合、当該病院から勤務先に向かうとすれば合理的である経路・方法をとり逸脱・中断することなく出勤していたとしても、通勤災害とは認められない。", correct: false, explain: "通勤災害と認められる。社会通念上必要な看護のための病院からの出勤は、合理的な経路・方法による通勤として認められる。" },
+      { label: "D", text: "労働者が、退勤時にタイムカードを打刻し、更衣室で着替えをして事業場施設内の階段を降りる途中、ズボンの裾が靴に絡んだために足を滑らせ、階段を5段ほど落ちて腰部を強打し負傷した場合、通勤災害とは認められない。", correct: true, explain: "正解肢。事業場施設内の災害は事業主の支配管理下にあるため「業務災害」として扱われ、通勤災害とはならない。" },
+      { label: "E", text: "長年営業に従事している労働者が、通常通りの時刻に通常通りの経路を徒歩で勤務先に向かっている途中に突然倒れ、急性心不全で死亡した場合、通勤災害と認められる。", correct: false, explain: "通勤災害と認められない。通勤に起因しない疾病による死亡は通勤災害ではない。" }
+    ],
+    correctLabel: "D",
+    reference: "労災保険法 第7条"
+  },
+  {
+    id: "r6-rousai-3", subject: "rousai", subjectName: "労災・徴収", qNumber: "問3", year: "R6",
+    instruction: "厚生労働省労働基準局長通知「心理的負荷による精神障害の認定基準」（令和5年9月1日付け基発0901第2号）に関する次の記述のうち、正しいものはいくつあるか。\n\nア 対象疾病には、統合失調症や気分障害等のほか、頭部外傷等の器質性脳疾患に付随する精神障害、及びアルコールや薬物等による精神障害も含まれる。\n\nイ 対象疾病を発病して治療が必要な状態にある者について、認定基準別表1の特別な出来事があり、その後おおむね6か月以内に対象疾病が自然経過を超えて著しく悪化したと医学的に認められる場合には、当該特別な出来事による心理的負荷が悪化の原因であると推認し、当該悪化した部分について業務起因性を認める。\n\nウ 対象疾病を発病して治療が必要な状態にある者について、認定基準別表1の特別な出来事がない場合には、対象疾病の悪化の前おおむね6か月以内の業務による強い心理的負荷によって当該対象疾病が自然経過を超えて著しく悪化したものと精神医学的に判断されたとしても、当該悪化した部分について業務起因性は認められない。\n\nエ 対象疾病の症状が現れなくなった又は症状が改善し安定した状態が一定期間継続している場合や、社会復帰を目指して行ったリハビリテーション療法等を終えた場合であって、通常の就労が可能な状態に至ったときには、投薬等を継続していても通常は治ゆ（症状固定）の状態にあると考えられるところ、対象疾病がいったん治ゆ（症状固定）した後において再びその治療が必要な状態が生じた場合は、新たな疾病と取り扱う。\n\nオ 業務によりうつ病を発病したと認められる者が自殺を図り死亡した場合には、当該疾病によって正常の認識、行為選択能力が著しく阻害され、あるいは自殺行為を思いとどまる精神的抑制力が著しく阻害されている状態に至ったものと推定し、当該死亡につき業務起因性を認める。",
+    choices: [
+      { label: "A", text: "一つ", correct: false, explain: "イ、エ、オが正しい（3つ）。" },
+      { label: "B", text: "二つ", correct: false, explain: "" },
+      { label: "C", text: "三つ", correct: true, explain: "正解肢。イ○エ○オ○の3つが正しい。アは「頭部外傷等の器質性脳疾患に付随する精神障害」「アルコールや薬物等による精神障害」は認定基準の対象疾病には含まれない。ウは業務起因性が認められる場合がある。" },
+      { label: "D", text: "四つ", correct: false, explain: "" },
+      { label: "E", text: "五つ", correct: false, explain: "" }
+    ],
+    correctLabel: "C",
+    reference: "心理的負荷による精神障害の認定基準（令和5年9月1日付け基発0901第2号）"
+  },
+  {
+    id: "r6-rousai-4", subject: "rousai", subjectName: "労災・徴収", qNumber: "問4", year: "R6",
+    instruction: "複数事業労働者の業務災害に係る保険給付に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "休業補償給付が支給される三要件のうち「労働することができない」に関して、業務災害に被災した複数事業労働者が、現に一の事業場において労働者として就労しているものの、他方の事業場において当該業務災害に係る通院のため、所定労働時間の全部又は一部について労働することができない場合には、「労働することができない」に該当すると認められることがある。", correct: false, explain: "正しい。" },
+      { label: "B", text: "休業補償給付が支給される三要件のうち「賃金を受けない日」に関して、被災した複数事業労働者については、複数の就業先のうち、一部の事業場において、平均賃金相当額の60%以上の賃金を受けることにより「賃金を受けない日」に該当しない状態でありながら、他の事業場において、当該業務災害による傷病等により無給での休業をしているため、「賃金を受けない日」に該当する状態があり得る。", correct: false, explain: "正しい。" },
+      { label: "C", text: "複数事業労働者については、その疾病が業務災害による遅発性疾病である場合で、その診断が確定した日において、災害発生事業場を離職している場合の当該事業場に係る平均賃金相当額の算定については、災害発生事業場を離職した日を基準に、その日以前3か月間に災害発生事業場において支払われた賃金により算定し、当該金額を基礎として、診断によって当該疾病発生が確定した日までの賃金水準の上昇又は変動を考慮して算定する。", correct: false, explain: "正しい。" },
+      { label: "D", text: "複数事業労働者については、その疾病が業務災害による遅発性疾病である場合で、その診断が確定した日において、災害発生事業場を離職している場合の非災害発生事業場に係る平均賃金相当額については、算定事由発生日に当該事業場を離職しているか否かにかかわらず、遅発性疾病の診断が確定した日から3か月前の日を始期として、当該診断が確定した日までの期間中に、非災害発生事業場から賃金を受けている場合は、その3か月間に非災害発生事業場において支払われた賃金により算定する。", correct: true, explain: "正解肢（誤り）。非災害発生事業場の平均賃金相当額は、原則として当該事業場の離職日を基準に算定する。診断確定日から3か月前を基準とするのは災害発生事業場の側の話と混同したもの。" },
+      { label: "E", text: "複数事業労働者に係る平均賃金相当額の算定において、雇用保険法等の一部を改正する法律の施行日後に発生した業務災害たる傷病等については、当該傷病等の原因が生じた時点が改正法の施行日前であっても、当該傷病等が発生した時点において事業主が同一人でない2以上の事業に使用されていた場合は、給付基礎日額相当額を合算する必要がある。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "D",
+    reference: "労災保険法 第8条の3／複数事業労働者関係通達"
+  },
+  {
+    id: "r6-rousai-5", subject: "rousai", subjectName: "労災・徴収", qNumber: "問5", year: "R6",
+    instruction: "遺族補償年金の受給権に関する次の記述のうち、正しいものはいくつあるか。\n\nア 遺族補償年金の受給権は、当該遺族が死亡したときには消滅する。\n\nイ 遺族補償年金の受給権は、当該遺族が婚姻（届出をしていないが、事実上婚姻関係と同様の事情にある者を含む。）をしたときには消滅する。\n\nウ 遺族補償年金の受給権は、当該遺族が直系血族又は直系姻族以外の者の養子（届出をしていないが、事実上養子縁組関係と同様の事情にある者を含む。）となったときには消滅する。\n\nエ 遺族補償年金の受給権は、当該遺族である子・孫が18歳に達した日以後の最初の3月31日が終了したときには消滅する。\n\nオ 遺族補償年金の受給権は、当該遺族である兄弟姉妹が18歳に達した日以後の最初の3月31日が終了したときには消滅する。",
+    choices: [
+      { label: "A", text: "一つ", correct: false, explain: "" },
+      { label: "B", text: "二つ", correct: false, explain: "" },
+      { label: "C", text: "三つ", correct: true, explain: "正解肢。ア○イ○ウ○の3つが正しい。エ・オについて、子・孫・兄弟姉妹が18歳到達年度末に達しても、厚労省令で定める障害の状態にあるときは受給権は消滅しない。" },
+      { label: "D", text: "四つ", correct: false, explain: "" },
+      { label: "E", text: "五つ", correct: false, explain: "" }
+    ],
+    correctLabel: "C",
+    reference: "労災保険法 第16条の4"
+  },
+  {
+    id: "r6-rousai-6", subject: "rousai", subjectName: "労災・徴収", qNumber: "問6", year: "R6",
+    instruction: "労災保険の海外派遣特別加入制度に関する次の記述のうち、誤っているものはどれか。\n※本問は公式に「CおよびDを正答とする」とされています。",
+    choices: [
+      { label: "A", text: "海外派遣者は、派遣元の団体又は事業主が、海外派遣者を特別加入させることについて政府の承認を申請し、政府の承認があった場合に特別加入することができる。", correct: false, explain: "正しい。" },
+      { label: "B", text: "海外派遣者と派遣元の事業との雇用関係が、転勤、在籍出向、移籍出向等のいずれの形態で処理されていても、派遣元の事業主の命令で海外の事業に従事し、その事業との間に現実の労働関係をもつ限りは、特別加入の資格に影響を及ぼすものではない。", correct: false, explain: "正しい。" },
+      { label: "C", text: "海外派遣者として特別加入している者が、同一の事由について派遣先の事業の所在する国の労災保険から保険給付が受けられる場合には、わが国の労災保険給付との間で調整がなされなければならない。", correct: true, explain: "正解肢（誤り）。実際には海外との調整は行われない（事務負担の大きさ等を理由に）。" },
+      { label: "D", text: "海外派遣者として特別加入している者の赴任途上及び帰任途上の災害については、当該特別加入に係る保険給付は行われない。", correct: true, explain: "正解肢（誤り）。昭和52年に保険給付を行わないとされていたが、平成3年に当該取扱いは削除され、現在は赴任・帰任途上の災害も保険給付の対象となりうる。" },
+      { label: "E", text: "海外出張者として特段の加入手続を経ることなく当然に労災保険の保護を与えられるのか、海外派遣者として特別加入しなければ保護が与えられないのかは、その勤務の実態を総合的に勘案して判定されるべきものである。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "C",
+    reference: "労災保険法 第33条等／特別加入制度関連通達"
+  },
+  {
+    id: "r6-rousai-7", subject: "rousai", subjectName: "労災・徴収", qNumber: "問7", year: "R6",
+    instruction: "労災保険給付に関する次のアからオの記述のうち、正しいものの組合せはどれか。\n\nア 労働者が、重大な過失により、負傷、疾病、障害若しくは死亡又はこれらの原因となった事故を生じさせたときは、政府は、保険給付の全部又は一部を行わないことができる。\n\nイ 労働者を重大な過失により死亡させた遺族補償給付の受給資格者は、遺族補償給付を受けることができる遺族としない。\n\nウ 労働者が、懲役、禁固若しくは拘留の刑の執行のため刑事施設に拘置されている場合には、休業補償給付は行わない。\n\nエ 労働者が退職したときは、保険給付を受ける権利は消滅する。\n\nオ 偽りその他不正の手段により労働者が保険給付を受けたときは、政府は、その保険給付に要した費用に相当する金額の全部又は一部を当該労働者を使用する事業主から徴収することができる。",
+    choices: [
+      { label: "A", text: "（アとイ）", correct: false, explain: "" },
+      { label: "B", text: "（アとウ）", correct: true, explain: "正解肢。ア○（労災法12条の2の2第2項）、ウ○（同法14条の2等）。イは「故意」に死亡させた場合、エは「退職しても消滅しない」（同法12条の5）、オは事業主ではなく「当該労働者」から徴収。" },
+      { label: "C", text: "（イとエ）", correct: false, explain: "" },
+      { label: "D", text: "（ウとオ）", correct: false, explain: "" },
+      { label: "E", text: "（エとオ）", correct: false, explain: "" }
+    ],
+    correctLabel: "B",
+    reference: "労災保険法 第12条の2の2、第12条の5、第14条の2、第16条の9、第31条"
+  },
+  {
+    id: "r6-rousai-8", subject: "rousai", subjectName: "労災・徴収", qNumber: "問8", year: "R6",
+    instruction: "労働保険の保険料の徴収等に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "労働保険徴収法第8条に規定する請負事業の一括について、労災保険に係る保険関係が成立している事業のうち建設の事業であって、数次の請負によって行われる場合、雇用保険に係る保険関係については、元請事業に一括することなく事業としての適用単位が決められ、それぞれの事業ごとに労働保険徴収法が適用される。", correct: false, explain: "正しい。請負事業の一括は労災にのみ適用され、雇用保険の保険関係は一括されない。" },
+      { label: "B", text: "労働保険徴収法第8条に規定する請負事業の一括について、下請負に係る事業については下請負人が事業主であり、元請負人と下請負人の使用する労働者の間には労働関係がないが、同条第2項に規定する場合を除き、元請負人は当該請負に係る事業について下請負をさせた部分を含め、そのすべての労働者について事業主として保険料の納付等の義務を負う。", correct: false, explain: "正しい。" },
+      { label: "C", text: "下請負事業の分離に係る認可を受けようとする元請負人及び下請負人は、保険関係が成立した日の翌日から起算して10日以内に「下請負人を事業主とする認可申請書」を所轄都道府県労働局長に提出しなければならない。", correct: false, explain: "正しい。" },
+      { label: "D", text: "下請負事業の分離に係る認可を受けようとする元請負人及び下請負人は、天災その他不可抗力等のやむを得ない理由により、期限内に「下請負人を事業主とする認可申請書」を提出することができなかったときは、期限後であっても当該申請書を提出することができる。", correct: false, explain: "正しい。" },
+      { label: "E", text: "下請負事業の分離に係る認可を受けるためには、当該下請負事業の概算保険料が160万円以上、かつ、請負金額が1億8,000万円以上（消費税等相当額を除く。）であることが必要とされている。", correct: true, explain: "正解肢（誤り）。「かつ」ではなく「または」。概算保険料160万円以上「または」請負金額1億8,000万円以上で足りる。" }
+    ],
+    correctLabel: "E",
+    reference: "労働保険徴収法 第8条／徴収則 第8条"
+  },
+  {
+    id: "r6-rousai-9", subject: "rousai", subjectName: "労災・徴収", qNumber: "問9", year: "R6",
+    instruction: "労働保険の保険料の徴収等に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "労働保険料の口座振替による納付制度は、一括有期事業の事業主も、単独有期事業の事業主も対象となる。", correct: false, explain: "正しい。" },
+      { label: "B", text: "労働保険料の口座振替による納付制度は、納付が確実と認められ、かつ、口座振替の申出を承認することが労働保険料の徴収上有利と認められるときに限り、その申出を承認することができ、納入告知書によって行われる納付についても認められる。", correct: true, explain: "正解肢（誤り）。口座振替は概算・確定保険料の納付書による納付が対象であり、「納入告知書」による納付（認定決定等のペナルティ的納付）は対象外。" },
+      { label: "C", text: "労働保険料を口座振替によって納付することを希望する事業主は、労働保険徴収法施行規則第38条の2に定める事項を記載した書面を所轄都道府県労働局歳入徴収官に提出することによって申出を行わなければならない。", correct: false, explain: "正しい。" },
+      { label: "D", text: "労働保険料を口座振替によって納付する事業主は、概算保険料申告書及び確定保険料申告書を、日本銀行、年金事務所又は所轄公共職業安定所長を経由して所轄都道府県労働局歳入徴収官に提出することはできない。", correct: false, explain: "正しい。" },
+      { label: "E", text: "口座振替による納付制度を利用する事業主から納付に際し添えることとされている申告書の提出を受けた所轄都道府県労働局歳入徴収官は、労働保険料の納付に必要な納付書を労働保険徴収法第21条の2第1項の金融機関へ送付するものとされている。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "B",
+    reference: "労働保険徴収法 第21条の2／徴収則 第38条の2等"
+  },
+  {
+    id: "r6-rousai-10", subject: "rousai", subjectName: "労災・徴収", qNumber: "問10", year: "R6",
+    instruction: "労働保険の保険料の徴収等に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "事業主は、あらかじめ代理人を選任し、所轄労働基準監督署長又は所轄公共職業安定所長に届け出ている場合、労働保険徴収法施行規則によって事業主が行わなければならない労働保険料の納付に係る事項を、その代理人に行わせることができる。", correct: false, explain: "正しい。" },
+      { label: "B", text: "所轄都道府県労働局長、所轄労働基準監督署長又は所轄公共職業安定所長は、保険関係が成立し、若しくは成立していた事業の事業主又は労働保険事務組合若しくは労働保険事務組合であった団体に対して、労働保険徴収法の施行に関し必要な報告、文書の提出又は出頭を命ずる場合、文書によって行わなければならない。", correct: false, explain: "正しい。" },
+      { label: "C", text: "前保険年度より保険関係が引き続く継続事業における年度当初の確定精算に伴う精算返還金に係る時効の起算日は6月1日となるが、確定保険料申告書が法定納期限内に提出された場合、時効の起算日はその提出された日の翌日となる。", correct: false, explain: "正しい。" },
+      { label: "D", text: "継続事業の廃止及び有期事業の終了に伴う精算返還金に係る時効の起算日は事業の廃止又は終了の日の翌日となるが、確定保険料申告書が法定納期限内に提出された場合、時効の起算日はその提出された日となる。", correct: true, explain: "正解肢（誤り）。法定納期限内に確定保険料申告書が提出された場合の時効起算日は「提出された日の翌日」。「その日」ではない。" },
+      { label: "E", text: "事業主が概算保険料の申告書を提出していない場合、政府が労働保険徴収法第15条第3項の規定に基づき認定決定した概算保険料について通知を行ったとき、当該通知によって未納の当該労働保険料について時効の更新の効力を生ずる。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "D",
+    reference: "労働保険徴収法 第41条／時効関係通達"
+  },
+
+  // 雇用保険 問1〜問10
+  {
+    id: "r6-koyou-1", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問1", year: "R6",
+    instruction: "雇用保険の被保険者に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "報酬支払等の面からみて労働者的性格の強い者と認められる株式会社の代表取締役は被保険者となるべき他の要件を満たす限り被保険者となる。", correct: true, explain: "正解肢（誤り）。代表取締役は労働者的性格の強弱に関わらず被保険者にはならない。取締役であって労働者的性格が強い者は別途被保険者となり得る。" },
+      { label: "B", text: "適用事業の事業主に雇用されつつ自営業を営む者は、当該適用事業の事業主の下での就業条件が被保険者となるべき要件を満たす限り被保険者となる。", correct: false, explain: "正しい。" },
+      { label: "C", text: "労働者が長期欠勤して賃金の支払を受けていない場合であっても、被保険者となるべき他の要件を満たす雇用関係が存続する限り被保険者となる。", correct: false, explain: "正しい。" },
+      { label: "D", text: "中小企業等協同組合法に基づく企業組合の組合員は、組合との間に同法に基づく組合関係があることとは別に、当該組合との間に使用従属関係があり当該使用従属関係に基づく労働の提供に対し、その対償として賃金が支払われている場合、被保険者となるべき他の要件を満たす限り被保険者となる。", correct: false, explain: "正しい。" },
+      { label: "E", text: "学校教育法に規定する大学の夜間学部に在籍する者は、被保険者となるべき他の要件を満たす限り被保険者となる。", correct: false, explain: "正しい。昼間学生は適用除外だが、夜間学部や通信教育は対象外。" }
+    ],
+    correctLabel: "A",
+    reference: "雇用保険法 第4条・第6条／行政手引20351等"
+  },
+  {
+    id: "r6-koyou-2", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問2", year: "R6",
+    instruction: "Xは、令和3年4月1日にY社に週所定労働時間40時間、休日が1週当たり2日の労働契約で就職し、初めて被保険者資格を得て同年7月31日に私傷病により離職した。令和5年11月5日、Xは離職の原因となった傷病が治ゆしたためZ社に被保険者として週所定労働時間40時間、休日が1週当たり2日の労働契約で就職した。その後Xは私傷病により令和6年2月29日に離職した。\nこの場合、Z社離職時における基本手当の受給資格要件としての被保険者期間として、正しいものはどれか。なお、XはY社及びZ社において欠勤がなかったものとする。",
+    choices: [
+      { label: "A", text: "3か月", correct: false, explain: "" },
+      { label: "B", text: "3と2分の1か月", correct: true, explain: "正解肢。Z社在籍は令和5年11月5日〜令和6年2月29日。資格喪失日（令和6年3月1日）の前日から遡り1か月ごとに区切り、賃金支払基礎日数11日以上の月を1か月とする。令和5年12月1日〜令和6年2月29日の3か月（各月11日以上）と、令和5年11月5日〜11月30日の端数期間（26日・11日以上）が2分の1か月として計算される。Y社分はZ社の被保険者期間として合算されない（Y社離職後に受給せず再就職までの期間が2年超のため）。" },
+      { label: "C", text: "4か月", correct: false, explain: "" },
+      { label: "D", text: "7か月", correct: false, explain: "Y社分を合算するとこの値になるが、本問ではY社離職から2年超経過しており合算できない。" },
+      { label: "E", text: "7と2分の1か月", correct: false, explain: "" }
+    ],
+    correctLabel: "B",
+    reference: "雇用保険法 第13条・第14条"
+  },
+  {
+    id: "r6-koyou-3", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問3", year: "R6",
+    instruction: "雇用保険の傷病手当に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "受給資格者が離職後最初に公共職業安定所に求職の申込みをした日以後において、傷病の認定を受けた場合、失業している日（疾病又は負傷のため職業に就くことができない日を含む。）が通算して7日に満たない間は、傷病手当を支給しない。", correct: false, explain: "正しい。待期7日は傷病手当でも適用。" },
+      { label: "B", text: "傷病手当を支給する日数は、傷病の認定を受けた受給資格者の所定給付日数から当該受給資格に基づき、既に基本手当を支給した日数を差し引いた日数に相当する日数分を限度とする。", correct: false, explain: "正しい。" },
+      { label: "C", text: "基本手当の支給を受ける口座振込受給資格者が当該受給期間中に疾病又は負傷により職業に就くことができなくなった場合、天災その他認定を受けなかったことについてやむを得ない理由がない限り、当該受給資格者は、職業に就くことができない理由がやんだ後における最初の支給日の直前の失業の認定日までに傷病の認定を受けなければならない。", correct: false, explain: "正しい。" },
+      { label: "D", text: "健康保険法第99条の規定による傷病手当金の支給を受けることができる者が傷病の認定を受けた場合、傷病手当を支給する。", correct: true, explain: "正解肢（誤り）。健保の傷病手当金を受けられる者には雇用保険の傷病手当は支給されない（併給調整）。" },
+      { label: "E", text: "傷病手当の日額は、雇用保険法第16条に規定する基本手当の日額に相当する額である。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "D",
+    reference: "雇用保険法 第37条"
+  },
+  {
+    id: "r6-koyou-4", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問4", year: "R6",
+    instruction: "雇用保険の資格喪失に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "事業主は、その雇用する労働者が離職した場合、当該労働者が離職の日において59歳未満であり、雇用保険被保険者離職票の交付を希望しないときは、事業所の所在地を管轄する公共職業安定所長に対して雇用保険被保険者離職証明書を添えずに雇用保険被保険者資格喪失届を提出することができる。", correct: false, explain: "正しい。59歳未満かつ離職票不要なら離職証明書の添付は不要。" },
+      { label: "B", text: "基本手当の支給を受けようとする者（未支給給付請求者を除く。）が離職票に記載された離職の理由に関し異議がある場合、管轄公共職業安定所に対し離職票及び離職の理由を証明することができる書類を提出しなければならない。", correct: false, explain: "正しい。" },
+      { label: "C", text: "雇用する労働者が退職勧奨に応じたことで離職したことにより被保険者でなくなった場合、事業主は、離職証明書及び当該退職勧奨により離職したことを証明する書類を添えて、その事業所の所在地を管轄する公共職業安定所長に雇用保険被保険者資格喪失届を提出しなければならない。", correct: true, explain: "正解肢（誤り）。退職勧奨による離職で別途「退職勧奨により離職したことを証明する書類」を必須添付とする法令規定はない。離職証明書の離職理由欄等での記載で足りる。" },
+      { label: "D", text: "基本手当の支給を受けようとする者（未支給給付請求者を除く。）であって就職状態にあるものが管轄公共職業安定所に対して離職票を提出した場合、当該就職状態が継続することにより基本手当の受給資格が認められなかったことについて不服があるときは、雇用保険審査官に対して審査請求をすることができる。", correct: false, explain: "正しい。" },
+      { label: "E", text: "公共職業安定所長は、離職票を提出した者が雇用保険法第13条第1項所定の被保険者期間の要件を満たさないと認めたときは、離職票にその旨を記載して返付しなければならない。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "C",
+    reference: "雇用保険法施行規則 第7条等"
+  },
+  {
+    id: "r6-koyou-5", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問5", year: "R6",
+    instruction: "雇用保険の不正受給に関する次のアからオの記述のうち、正しいものの組合せはどれか。\n\nア 基本手当の受給資格者が自己の労働によって収入を得た場合、当該収入が基本手当の減額の対象とならない額であっても、これを届け出なければ不正の行為として取り扱われる。\n\nイ 偽りその他不正の行為により基本手当の支給を受けた者がある場合には、政府は、その者に対して、支給した基本手当の全部又は一部の返還を命ずるとともに、厚生労働大臣の定める基準により、当該偽りその他不正の行為により支給を受けた基本手当の額の3倍に相当する額の金額を納付することを命ずることができる。\n\nウ 偽りその他不正の行為により基本手当の支給を受けた者がある場合には、政府は、その者に対して過去適法に受給した基本手当の額を含めた基本手当の全部又は一部を返還することを命ずることができる。\n\nエ 雇用保険法施行規則第120条にいう雇用関係助成金関係規定にかかわらず、過去5年以内に偽りその他不正の行為により雇用調整助成金の支給を受けた事業主には、雇用関係助成金を支給しない。\n\nオ 偽りその他不正の行為により基本手当の支給を受けた者にやむを得ない理由がある場合、基本手当の全部又は一部を支給することができる。",
+    choices: [
+      { label: "A", text: "（アとイ）", correct: false, explain: "" },
+      { label: "B", text: "（アとウ）", correct: false, explain: "" },
+      { label: "C", text: "（イとエ）", correct: false, explain: "" },
+      { label: "D", text: "（ウとオ）", correct: false, explain: "" },
+      { label: "E", text: "（エとオ）", correct: true, explain: "正解肢。エ○オ○。アは減額対象外の収入は届出なしでも不正にはあたらない。イは3倍ではなく「2倍」（返還+2倍=合計3倍）。ウは過去適法受給分まで返還させることはできない。" }
+    ],
+    correctLabel: "E",
+    reference: "雇用保険法 第10条の4／施行規則 第120条"
+  },
+  {
+    id: "r6-koyou-6", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問6", year: "R6",
+    instruction: "雇用保険の高年齢雇用継続給付に関する次の記述のうち、正しいものはどれか。",
+    choices: [
+      { label: "A", text: "支給対象月における高年齢雇用継続基本給付金の額として算定された額が、雇用保険法第17条第4項第1号に掲げる賃金日額の最低限度額の100分の80に相当する額を超えないとき、当該支給対象月について高年齢雇用継続基本給付金は支給されない。", correct: true, explain: "正解肢。支給額が最低限度額の80%以下の場合は支給されない。" },
+      { label: "B", text: "就業促進手当（安定した職業に就いた者）を受けたときは、当該就業促進手当に加えて同一の就職につき高年齢再就職給付金を受けることができる。", correct: false, explain: "誤り。再就職手当と高年齢再就職給付金はいずれか一方のみ選択。併給不可。" },
+      { label: "C", text: "高年齢再就職給付金の受給資格者に対して再就職後の支給対象月に支払われた賃金の額が、基本手当の日額の算定の基礎となった賃金日額に30を乗じて得た額の100分の85に相当する額未満であるとき、当該受給資格者に対して支給される高年齢再就職給付金の額は、支給対象月に支払われた賃金の額の100分の15となる。", correct: false, explain: "誤り。「100分の85未満」ではなく「100分の61未満」のとき15%の給付。" },
+      { label: "D", text: "厚生労働大臣が支給限度額を変更したため、高年齢雇用継続基本給付金を受給している者の支給対象月の賃金額が支給限度額以上となった場合、変更後の支給限度額は当該変更から3か月間、変更前の支給限度額の額とみなされる。", correct: false, explain: "誤り。3か月の猶予規定はなく、直ちに変更後の限度額が適用される。" },
+      { label: "E", text: "育児休業給付金の支給を受けて休業をした者は、当該育児休業給付金の支給を受けることができる休業をした月について、他の要件を満たす限り高年齢雇用継続基本給付金が支給される。", correct: false, explain: "誤り。月の初日から末日まで休業した月は高年齢雇用継続基本給付金は支給されない。" }
+    ],
+    correctLabel: "A",
+    reference: "雇用保険法 第61条・第61条の2"
+  },
+  {
+    id: "r6-koyou-7", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問7", year: "R6",
+    instruction: "雇用調整助成金に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "対象被保険者を休業させることにより雇用調整助成金の支給を受けようとする事業主は、休業の実施に関する事項について、あらかじめ当該事業所の労働者の過半数で組織する労働組合（労働者の過半数で組織する労働組合がないときは、労働者の過半数を代表する者）との間に書面による協定をしなければならない。", correct: false, explain: "正しい。" },
+      { label: "B", text: "被保険者を出向させたことにより雇用調整助成金の支給を受けた事業主が当該出向の終了後6か月以内に当該被保険者を再度出向させるときは、当該事業主は、再度の出向に係る雇用調整助成金を受給することができない。", correct: false, explain: "正しい。" },
+      { label: "C", text: "出向先事業主が出向元事業主に係る出向対象被保険者を雇い入れる場合、当該出向先事業主の事業所の被保険者を出向させているときは、当該出向先事業主は、雇用調整助成金を受給することができない。", correct: false, explain: "正しい。" },
+      { label: "D", text: "対象被保険者を休業させることにより雇用調整助成金の支給を受けようとする事業主は、当該事業所の対象被保険者に係る休業等の実施の状況及び手当又は賃金の支払の状況を明らかにする書類を整備していなければならない。", correct: false, explain: "正しい。" },
+      { label: "E", text: "事業主が景気の変動、産業構造の変化その他の経済上の理由により、急激に事業活動の縮小を余儀なくされたことにより休業することを都道府県労働局長に届け出た場合、当該事業主は、届出の際に当該事業主が指定した日から起算して3年間雇用調整助成金を受けることができる。", correct: true, explain: "正解肢（誤り）。3年間ではなく「1年間」が正しい。" }
+    ],
+    correctLabel: "E",
+    reference: "雇用保険法施行規則 第102条の3等"
+  },
+  {
+    id: "r6-koyou-8", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問8", year: "R6",
+    instruction: "労働保険の保険料の徴収等に関する次の記述のうち、正しいものはどれか。",
+    choices: [
+      { label: "A", text: "雇用保険暫定任意適用事業に該当する事業が雇用保険法第5条第1項の適用事業に該当するに至った場合は、その該当するに至った日から10日以内に労働保険徴収法第4条の2に規定する保険関係成立届を所轄労働基準監督署長又は所轄公共職業安定所長に提出することによって、その事業につき雇用保険に係る保険関係が成立する。", correct: false, explain: "誤り。適用事業に該当するに至った「日」において保険関係が成立する。届出は義務だが、成立自体は該当日。" },
+      { label: "B", text: "都道府県に準ずるもの及び市町村に準ずるものの行う事業については、労災保険に係る保険関係と雇用保険に係る保険関係の双方を一の事業についての労働保険の保険関係として取り扱い、一般保険料の算定、納付等の手続を一元的に処理する事業として定められている。", correct: false, explain: "誤り。都道府県・市町村に準ずる事業は「二元適用事業」であり、労災と雇用で別個に処理する。" },
+      { label: "C", text: "保険関係が成立している事業の事業主は、事業主の氏名又は名称及び住所に変更があったときは、変更を生じた日の翌日から起算して10日以内に、労働保険徴収法施行規則第5条第2項に規定する事項を記載した届書を所轄労働基準監督署長又は所轄公共職業安定所長に提出することによって行わなければならない。", correct: true, explain: "正解肢。" },
+      { label: "D", text: "雇用保険に係る保険関係が成立している雇用保険暫定任意適用事業の事業主については、その事業に使用される労働者の4分の3以上の同意を得て、その者が当該保険関係の消滅の申請をした場合、厚生労働大臣の認可があった日に、その事業についての当該保険関係が消滅する。", correct: false, explain: "誤り。認可「があった日の翌日」に消滅する。" },
+      { label: "E", text: "雇用保険法第5条第1項の適用事業及び雇用保険に係る保険関係が成立している雇用保険暫定任意適用事業の保険関係は、当該事業が廃止され、又は終了したときは、その事業についての保険関係は、その日に消滅する。", correct: false, explain: "誤り。事業の廃止・終了の「翌日」に消滅する。" }
+    ],
+    correctLabel: "C",
+    reference: "労働保険徴収法 第4条～第5条／徴収則第5条"
+  },
+  {
+    id: "r6-koyou-9", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問9", year: "R6",
+    instruction: "労働保険の保険料の徴収等に関する次の記述のうち、誤っているものはどれか。",
+    choices: [
+      { label: "A", text: "雇用保険印紙購入通帳は、その交付の日の属する保険年度に限りその効力を有するが、有効期間の更新を受けた当該雇用保険印紙購入通帳は、更新前の雇用保険印紙購入通帳の有効期間が満了する日の翌日の属する保険年度に限り、その効力を有する。", correct: false, explain: "正しい。" },
+      { label: "B", text: "事業主は、雇用保険印紙購入通帳の雇用保険印紙購入申込書がなくなった場合であって、当該保険年度中に雇用保険印紙を購入しようとするときは、その旨を所轄公共職業安定所長に申し出て、再交付を受けなければならない。", correct: false, explain: "正しい。" },
+      { label: "C", text: "事業主は、その所持する雇用保険印紙購入通帳の有効期間が満了したときは、速やかに、その所持する雇用保険印紙購入通帳を所轄公共職業安定所長に返納しなければならない。", correct: false, explain: "正しい。" },
+      { label: "D", text: "事業主は、雇用保険印紙と印紙保険料納付計器を併用して印紙保険料を納付する場合、労働保険徴収法施行規則第54条に定める印紙保険料納付状況報告書によって、毎月における雇用保険印紙の受払状況及び毎月における印紙保険料納付計器の使用状況を、所轄公共職業安定所長を経由して、所轄都道府県労働局歳入徴収官に報告しなければならない。", correct: true, explain: "正解肢（誤り）。「印紙保険料納付状況報告書」で印紙の受払状況を、「印紙保険料納付計器使用状況報告書」で納付計器の使用状況を報告する。1つの報告書で両方報告するわけではない。" },
+      { label: "E", text: "事業主は、印紙保険料納付計器の全部又は一部を使用しなくなったときは、当該使用しなくなった印紙保険料納付計器を納付計器に係る都道府県労働局歳入徴収官に提示しなければならず、当該都道府県労働局歳入徴収官による当該印紙保険料納付計器の封の解除その他必要な措置を受けることとなる。", correct: false, explain: "正しい。" }
+    ],
+    correctLabel: "D",
+    reference: "労働保険徴収法施行規則 第54条等"
+  },
+  {
+    id: "r6-koyou-10", subject: "koyou", subjectName: "雇用・徴収", qNumber: "問10", year: "R6",
+    instruction: "労働保険の保険料の徴収等に関する次の記述のうち、正しいものはどれか。",
+    choices: [
+      { label: "A", text: "前保険年度より保険関係が引き続く継続事業の事業主は、確定保険料申告書を、保険年度の7月10日までに所轄都道府県労働局歳入徴収官に提出しなければならないが、当該事業が3月31日に廃止された場合には同年5月10日までに提出しなければならない。", correct: false, explain: "誤り。保険関係消滅日（事業廃止の翌日＝4月1日）から50日以内なので、5月20日が期限。" },
+      { label: "B", text: "3月31日に事業が終了した有期事業の事業主は、確定保険料申告書を、同年5月10日までに所轄都道府県労働局歳入徴収官に提出しなければならない。", correct: false, explain: "誤り。事業終了日の翌日から50日以内なので5月20日までが正しい。" },
+      { label: "C", text: "2以上の有期事業が一の事業とみなされる事業（一括有期事業）についての事業主は、当該事業が継続している場合、一括有期事業についての報告書を、次の保険年度の7月1日までに所轄都道府県労働局歳入徴収官に提出しなければならない。", correct: false, explain: "誤り。7月10日まで（6月1日から40日以内）が正しい。" },
+      { label: "D", text: "前保険年度より保険関係が引き続く継続事業の事業主は、前保険年度の3月31日に賃金締切日があり当該保険年度の4月20日に当該賃金を支払う場合、当該賃金は前保険年度の確定保険料として申告すべき一般保険料の額を算定する際の賃金総額に含まれる。", correct: true, explain: "正解肢。賃金総額は「締め日ベース」で計算する。" },
+      { label: "E", text: "追徴金を徴収しようとする場合、所轄都道府県労働局歳入徴収官は、事業主が通知を受けた日から起算して30日を経過した日をその納期限と定め、納入告知書により、事業主に、当該追徴金の額、その算定の基礎となる事項及び納期限を通知しなければならない。", correct: false, explain: "誤り。「通知を発した日」から起算するのが正しい。" }
+    ],
+    correctLabel: "D",
+    reference: "労働保険徴収法 第19条・第21条等"
+  }
+];
+
+// R6 一問一答（Examから自動生成）
+DATA.r6.questions = [];
+DATA.r6.exams.forEach(e => {
+  e.choices.forEach(c => {
+    DATA.r6.questions.push({
+      id: `${e.id}-${c.label.toLowerCase()}`,
+      subject: e.subject, subjectName: e.subjectName, qNumber: e.qNumber, choice: c.label, year: e.year,
+      context: null,
+      question: c.text,
+      answer: c.correct,
+      explanation: (c.correct ? "正しい。" : "誤り。") + (c.explain || ""),
+      reference: e.reference
+    });
+  });
+});
+
+// R6 選択式
+DATA.r6.sentaku = [
+  {
+    id: "r6-sentaku-rousai",
+    subject: "rousai", subjectName: "労災・徴収",
+    year: "R6", qNumber: "問2",
+    // 本文（{A},{B},{C},{D},{E}で空欄表示）
+    passages: [
+      { title: "1", text: "労災保険法施行規則第14条第1項は、「障害補償給付を支給すべき身体障害の障害等級は、別表第1に定めるところによる。」と規定し、同条第2項は、「別表第1に掲げる身体障害が2以上ある場合には、重い方の身体障害の該当する障害等級による。」と規定するが、同条第3項柱書きは、「第{A}級以上に該当する身体障害が2以上あるとき」は「前2項の規定による障害等級」を「2級」繰り上げた等級、「第{B}級以上に該当する身体障害が2以上あるとき」は「前2項の規定による障害等級」を「3級」繰り上げた等級によるとする。" },
+      { title: "2", text: "年金たる保険給付の支給は、支給すべき事由が生じた{C}から始め、支給を受ける権利が消滅した月で終わるものとする。また、保険給付を受ける権利を有する者が死亡した場合において、その死亡した者に支給すべき保険給付でまだその者に支給しなかったものがあるときは、その者の配偶者、子、父母、孫、祖父母又は兄弟姉妹であって、その者の死亡の当時その者と生計を同じくしていたものは、{D}の名で、その未支給の保険給付の支給を請求することができる。" },
+      { title: "3", text: "最高裁判所は、遺族補償年金に関して次のように判示した。「労災保険法に基づく保険給付は、その制度の趣旨目的に従い、特定の損害について必要額を塡補するために支給されるものであり、遺族補償年金は、労働者の死亡による遺族の{E}を塡補することを目的とするものであって、その塡補の対象とする損害は、被害者の死亡による逸失利益等の消極損害と同性質であり、かつ、相互補完性があるものと解される。」" }
+    ],
+    blanks: [
+      { label: "A", correct: 5, explain: "「8級以上の身体障害が2以上あるとき」は2級繰上げ（障害等級併合繰上げ）。" },
+      { label: "B", correct: 2, explain: "「5級以上の身体障害が2以上あるとき」は3級繰上げ。" },
+      { label: "C", correct: 17, explain: "年金の支給は「支給すべき事由が生じた月の翌月」から始まる。" },
+      { label: "D", correct: 10, explain: "未支給の保険給付は「自己の名」で請求する。" },
+      { label: "E", correct: 20, explain: "最高裁判例（平成27年3月4日）。遺族補償年金は「被扶養利益の喪失」を塡補することを目的とする。" }
+    ],
+    choices: [
+      { num: 1, text: "3" }, { num: 2, text: "5" }, { num: 3, text: "6" }, { num: 4, text: "7" },
+      { num: 5, text: "8" }, { num: 6, text: "10" }, { num: 7, text: "12" }, { num: 8, text: "13" },
+      { num: 9, text: "事業主" }, { num: 10, text: "自己" }, { num: 11, text: "死亡した者" },
+      { num: 12, text: "生活基盤の喪失" }, { num: 13, text: "精神的損害" }, { num: 14, text: "世帯主" },
+      { num: 15, text: "相続財産の喪失" }, { num: 16, text: "月" }, { num: 17, text: "月の翌月" },
+      { num: 18, text: "日" }, { num: 19, text: "日の翌日" }, { num: 20, text: "被扶養利益の喪失" }
+    ],
+    reference: "労災保険法施行規則 第14条／労災保険法 第9条・第11条／最判平27.3.4"
+  },
+  {
+    id: "r6-sentaku-koyou",
+    subject: "koyou", subjectName: "雇用・徴収",
+    year: "R6", qNumber: "問3",
+    passages: [
+      { title: "1", text: "被保険者が{A}、厚生労働省令で定めるところにより出生時育児休業をし、当該被保険者が雇用保険法第61条の8に規定する出生時育児休業給付金の支給を受けたことがある場合において、当該被保険者が同一の子について3回以上の出生時育児休業をしたとき、{B}回目までの出生時育児休業について出生時育児休業給付金が支給される。また、同一の子について当該被保険者がした出生時育児休業ごとに、当該出生時育児休業を開始した日から当該出生時育児休業を終了した日までの日数を合算して得た日数が{C}日に達した日後の出生時育児休業については、出生時育児休業給付金が支給されない。" },
+      { title: "2", text: "被保険者が雇用されていた適用事業所が、激甚災害法第2条の規定による激甚災害の被害を受けたことにより、やむを得ず、事業を休止し、若しくは廃止したことによって離職を余儀なくされた者又は同法第25条第3項の規定により離職したものとみなされた者であって、職業に就くことが特に困難な地域として厚生労働大臣が指定する地域内に居住する者が、基本手当の所定給付日数を超えて受給することができる個別延長給付の日数は、雇用保険法第24条の2により{D}日を限度とする。" },
+      { title: "3", text: "令和4年3月31日以降に就労していなかった者が、令和6年4月1日に65歳に達し、同年7月1日にX社に就職して1週当たり18時間勤務することとなった後、同年10月1日に季節的事業を営むY社に就職して1週当たり12時間勤務し二つの雇用関係を有するに至り、雇用保険法第37条の5第1項に基づく特例高年齢被保険者となることの申出をしていない場合、同年12月1日時点において当該者は{E}となる。" }
+    ],
+    blanks: [
+      { label: "A", correct: 2, explain: "出生時育児休業給付金の対象は「一般被保険者又は高年齢被保険者」である。" },
+      { label: "B", correct: 2, explain: "同一の子について3回以上の出生時育休をしたとき、給付は2回目までが対象。" },
+      { label: "C", correct: 3, explain: "日数の合算が28日に達した日後の出生時育休は給付対象外。" },
+      { label: "D", correct: 4, explain: "個別延長給付の日数は120日が限度（激甚災害による特例）。" },
+      { label: "E", correct: 3, explain: "X社18時間（主たる雇用）は高年齢被保険者の要件（週20時間以上）を満たさず、特例高年齢被保険者の申出もしていないため雇用保険法の適用除外となる。" }
+    ],
+    choices: [
+      // 各空欄ごとに選択肢が異なる形式（原典のとおり）
+      { num: 1, text: "一般被保険者であるときのみ", group: "A" },
+      { num: 2, text: "一般被保険者又は高年齢被保険者であるとき", group: "A" },
+      { num: 3, text: "一般被保険者又は短期雇用特例被保険者であるとき", group: "A" },
+      { num: 4, text: "一般被保険者又は日雇労働被保険者であるとき", group: "A" },
+      // B群
+      { num: 5, text: "1", group: "B" },
+      { num: 6, text: "2", group: "B" },
+      { num: 7, text: "3", group: "B" },
+      { num: 8, text: "4", group: "B" },
+      // C群
+      { num: 9, text: "14", group: "C" },
+      { num: 10, text: "21", group: "C" },
+      { num: 11, text: "28", group: "C" },
+      { num: 12, text: "30", group: "C" },
+      // D群
+      { num: 13, text: "30", group: "D" },
+      { num: 14, text: "60", group: "D" },
+      { num: 15, text: "90", group: "D" },
+      { num: 16, text: "120", group: "D" },
+      // E群
+      { num: 17, text: "一般被保険者", group: "E" },
+      { num: 18, text: "高年齢被保険者", group: "E" },
+      { num: 19, text: "雇用保険法の適用除外", group: "E" },
+      { num: 20, text: "短期雇用特例被保険者", group: "E" }
+    ],
+    // 雇用保険の選択式はABCDE群でそれぞれ1〜4の番号なので正解をgroup判定用に変換
+    // correctは上で「各群内での選択肢番号」を表す
+    reference: "雇用保険法 第61条の8・第37条の5・第24条の2"
+  }
+];
+
+// R5の選択式は空
+DATA.r5.sentaku = [];
+
+// =================================
+// STATE
+// =================================
+const STORAGE_KEY = 'sharoushi-app-v4';
+let state = {
+  history: {},
+  bookmarks: [],
+  examHistory: [],
+  sentakuHistory: [],
+  currentYear: 'r6'  // デフォルトは最新年度
+};
+let session = { questions: [], index: 0, correct: 0, answered: false, wrongIds: [] };
+let examSession = null;
+let examTimerInterval = null;
+let sentakuSession = null;
+let sentakuTimerInterval = null;
+let activeBlankLabel = null;
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) {
+      const parsed = JSON.parse(s);
+      state = { ...state, ...parsed };
+    }
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function getCurrentData() { return DATA[state.currentYear]; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() {
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  if (sentakuTimerInterval) { clearInterval(sentakuTimerInterval); sentakuTimerInterval = null; }
+  showScreen('home');
+  renderHome();
+}
+
+// =================================
+// HOME
+// =================================
+function getSubjectStats() {
+  const stats = {};
+  const data = getCurrentData();
+  SUBJECTS.forEach(s => {
+    stats[s.id] = { total: 0, solved: 0, correct: 0, examTotal: 0, sentakuTotal: 0 };
+  });
+  data.questions.forEach(q => {
+    if (!stats[q.subject]) return;
+    stats[q.subject].total++;
+    const h = state.history[q.id];
+    if (h) { stats[q.subject].solved++; if (h.correct) stats[q.subject].correct++; }
+  });
+  data.exams.forEach(e => { if (stats[e.subject]) stats[e.subject].examTotal++; });
+  data.sentaku.forEach(s => { if (stats[s.subject]) stats[s.subject].sentakuTotal++; });
+  return stats;
+}
+
+function getBestExamScore(subjectId) {
+  const attempts = state.examHistory.filter(h => h.subjectId === subjectId && h.year === state.currentYear);
+  if (attempts.length === 0) return null;
+  return Math.max(...attempts.map(a => a.score));
+}
+function getBestSentakuScore(subjectId) {
+  const attempts = state.sentakuHistory.filter(h => h.subjectId === subjectId && h.year === state.currentYear);
+  if (attempts.length === 0) return null;
+  return Math.max(...attempts.map(a => a.score));
+}
+
+function renderHome() {
+  const data = getCurrentData();
+  const total = data.questions.length;
+  const solved = Object.keys(state.history).filter(id => data.questions.some(q => q.id === id)).length;
+  const correctCount = Object.entries(state.history).filter(([id, h]) => h.correct && data.questions.some(q => q.id === id)).length;
+  const rate = solved > 0 ? Math.round((correctCount / solved) * 100) : null;
+  const bookmarkCount = state.bookmarks.filter(id => data.questions.some(q => q.id === id)).length;
+  const subjectStats = getSubjectStats();
+
+  const html = `
+    <div class="hero">
+      <div class="hero-kanji">合格への道</div>
+      <div class="hero-sub">STEP BY STEP</div>
+    </div>
+
+    <div class="year-tabs">
+      ${YEARS.map(y => `
+        <button class="year-tab ${state.currentYear === y.id ? 'active' : ''}" onclick="switchYear('${y.id}')">${y.name}</button>
+      `).join('')}
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num">${total}</div><div class="stat-label">肢数</div></div>
+      <div class="stat"><div class="stat-num">${solved}</div><div class="stat-label">解答済</div></div>
+      <div class="stat"><div class="stat-num">${rate !== null ? rate + '%' : '—'}</div><div class="stat-label">正答率</div></div>
+      <div class="stat"><div class="stat-num">${bookmarkCount}</div><div class="stat-label">付箋</div></div>
+    </div>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchPanel('panel-oneshot', this)">一問一答<span class="tab-sub">HITOMON</span></button>
+      <button class="mode-tab" onclick="switchPanel('panel-exam', this)">択一式<span class="tab-sub">TAKUITSU</span></button>
+      <button class="mode-tab" onclick="switchPanel('panel-sentaku', this)">選択式<span class="tab-sub">SENTAKU</span></button>
+    </div>
+
+    <div class="mode-panel active" id="panel-oneshot">
+      <div class="section-label">科目別演習 <span class="hint">肢別○×</span></div>
+      <div class="subject-list">
+        ${SUBJECTS.map(s => {
+          const st = subjectStats[s.id];
+          const isEmpty = st.total === 0;
+          const pct = st.total > 0 ? Math.round((st.solved / st.total) * 100) : 0;
+          return `
+            <div class="subject-item ${isEmpty ? 'disabled' : ''}" ${isEmpty ? '' : `onclick="startSubject('${s.id}')"`}>
+              <div class="subject-name mincho">${s.name}</div>
+              <div class="subject-meta">
+                ${isEmpty ? '<span class="badge-soon">準備中</span>'
+                  : `<span class="subject-count">${st.solved}/${st.total}</span>
+                     <div class="subject-progress" style="--p:${pct}%"></div>
+                     <span class="chevron">›</span>`}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="section-label">学習モード</div>
+      <div class="mode-grid">
+        <button class="mode-btn" onclick="startMode('all')"><span class="mode-icon mincho">全</span><div class="mode-title">全問ランダム</div><div class="mode-desc">この年度の全肢</div></button>
+        <button class="mode-btn" onclick="startMode('wrong')"><span class="mode-icon mincho">復</span><div class="mode-title">誤答の復習</div><div class="mode-desc">間違えた問題のみ</div></button>
+        <button class="mode-btn" onclick="startMode('bookmark')"><span class="mode-icon mincho" style="color:var(--pin)">栞</span><div class="mode-title">付箋の問題</div><div class="mode-desc">印をつけた問題</div></button>
+        <button class="mode-btn" onclick="startMode('unsolved')"><span class="mode-icon mincho">未</span><div class="mode-title">未回答</div><div class="mode-desc">まだ解いていない</div></button>
+      </div>
+    </div>
+
+    <div class="mode-panel" id="panel-exam">
+      <div class="exam-note">
+        <span class="nt mincho">択一式について</span>
+        本番同様A〜Eの5択から1つ選ぶ形式。全問解き終えてから採点。解答中は前後の問題に移動可能、△印で見直し候補をマーク可。タイマーは表示のみで時間切れなし。
+      </div>
+      <div class="section-label">科目別試験</div>
+      <div class="subject-list">
+        ${SUBJECTS.map(s => {
+          const st = subjectStats[s.id];
+          const isEmpty = st.examTotal === 0;
+          const best = getBestExamScore(s.id);
+          return `
+            <div class="subject-item ${isEmpty ? 'disabled' : ''}" ${isEmpty ? '' : `onclick="startExam('${s.id}')"`}>
+              <div class="subject-name mincho">${s.name}</div>
+              <div class="subject-meta">
+                ${isEmpty ? '<span class="badge-soon">準備中</span>'
+                  : `${best !== null ? `<span class="badge-best mincho">最高 ${best}/${st.examTotal}</span>` : ''}
+                     <span class="subject-count">${st.examTotal}問</span>
+                     <span class="chevron">›</span>`}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="mode-panel" id="panel-sentaku">
+      <div class="exam-note">
+        <span class="nt mincho">選択式について</span>
+        文章中の空欄A〜Eを選択肢から埋める形式。空欄をタップして、下部の選択肢一覧から語句を選びます。全空欄埋め終わってから採点。各科目5空欄。
+      </div>
+      <div class="section-label">科目別選択式</div>
+      <div class="subject-list">
+        ${SUBJECTS.map(s => {
+          const st = subjectStats[s.id];
+          const isEmpty = st.sentakuTotal === 0;
+          const best = getBestSentakuScore(s.id);
+          return `
+            <div class="subject-item ${isEmpty ? 'disabled' : ''}" ${isEmpty ? '' : `onclick="startSentaku('${s.id}')"`}>
+              <div class="subject-name mincho">${s.name}</div>
+              <div class="subject-meta">
+                ${isEmpty ? '<span class="badge-soon">準備中</span>'
+                  : `${best !== null ? `<span class="badge-best mincho">最高 ${best}/5</span>` : ''}
+                     <span class="subject-count">5空欄</span>
+                     <span class="chevron">›</span>`}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('homeContent').innerHTML = html;
+}
+
+function switchPanel(panelId, btn) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+function switchYear(yearId) {
+  state.currentYear = yearId;
+  saveState();
+  renderHome();
+}
+
+// =================================
+// 一問一答
+// =================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startSubject(subjectId) {
+  const qs = getCurrentData().questions.filter(q => q.subject === subjectId);
+  if (qs.length === 0) return;
+  startQuiz(qs);
+}
+
+function startMode(mode) {
+  const data = getCurrentData();
+  let qs = [];
+  if (mode === 'all') qs = shuffle(data.questions);
+  else if (mode === 'wrong') {
+    const wrongIds = Object.entries(state.history).filter(([_, h]) => !h.correct).map(([id]) => id);
+    qs = data.questions.filter(q => wrongIds.includes(q.id));
+    if (qs.length === 0) { alert('復習対象の問題はありません。'); return; }
+    qs = shuffle(qs);
+  } else if (mode === 'bookmark') {
+    qs = data.questions.filter(q => state.bookmarks.includes(q.id));
+    if (qs.length === 0) { alert('付箋のついた問題はありません。'); return; }
+  } else if (mode === 'unsolved') {
+    qs = data.questions.filter(q => !state.history[q.id]);
+    if (qs.length === 0) { alert('未回答の問題はありません。'); return; }
+    qs = shuffle(qs);
+  }
+  startQuiz(qs);
+}
+
+function startQuiz(qs) {
+  session = { questions: qs, index: 0, correct: 0, answered: false, wrongIds: [] };
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = session.questions[session.index];
+  session.answered = false;
+  document.getElementById('counter').textContent = `${session.index + 1} / ${session.questions.length}`;
+  document.getElementById('progressFill').style.width = `${(session.index / session.questions.length) * 100}%`;
+
+  const bmBtn = document.getElementById('bookmarkBtn');
+  if (state.bookmarks.includes(q.id)) { bmBtn.classList.add('active'); bmBtn.textContent = '★'; }
+  else { bmBtn.classList.remove('active'); bmBtn.textContent = '☆'; }
+
+  const body = document.getElementById('quizBody');
+  body.innerHTML = `
+    <div class="meta-row">
+      <span class="tag accent">${q.subjectName}</span>
+      <span class="tag">${q.year}・${q.qNumber} ${q.choice}</span>
+    </div>
+    ${q.context ? `<div class="question-context"><div class="question-context-label">前提</div>${q.context}</div>` : ''}
+    <div class="question-text mincho">${q.question}</div>
+    <div class="answer-area">
+      <button class="answer-btn" data-value="true" onclick="answer(true)"><span class="sym mincho">○</span><span class="lbl">TADASHII</span></button>
+      <button class="answer-btn" data-value="false" onclick="answer(false)"><span class="sym mincho">×</span><span class="lbl">AYAMARI</span></button>
+    </div>
+    <div class="result-panel" id="resultPanel">
+      <div class="result-verdict" id="verdict"></div>
+      <div class="result-answer" id="answerLine"></div>
+      <div class="explanation-label">解説</div>
+      <div class="explanation" id="explanation"></div>
+      <div class="reference mincho" id="reference"></div>
+    </div>
+  `;
+  document.getElementById('nextBtn').classList.remove('show');
+  body.scrollTo(0, 0);
+}
+
+function toggleBookmark() {
+  const q = session.questions[session.index];
+  const idx = state.bookmarks.indexOf(q.id);
+  if (idx >= 0) state.bookmarks.splice(idx, 1);
+  else state.bookmarks.push(q.id);
+  saveState();
+  const bmBtn = document.getElementById('bookmarkBtn');
+  if (state.bookmarks.includes(q.id)) { bmBtn.classList.add('active'); bmBtn.textContent = '★'; }
+  else { bmBtn.classList.remove('active'); bmBtn.textContent = '☆'; }
+}
+
+function answer(userAnswer) {
+  if (session.answered) return;
+  session.answered = true;
+  const q = session.questions[session.index];
+  const correct = userAnswer === q.answer;
+  if (correct) session.correct++;
+  else session.wrongIds.push(q.id);
+  state.history[q.id] = { correct, attempts: (state.history[q.id]?.attempts || 0) + 1, lastAt: Date.now() };
+  saveState();
+
+  document.querySelectorAll('#quiz .answer-btn').forEach(b => {
+    b.disabled = true;
+    const val = b.dataset.value === 'true';
+    if (val === q.answer) b.classList.add('correct-choice');
+    else if (val === userAnswer) b.classList.add('wrong-choice');
+  });
+  if (navigator.vibrate) navigator.vibrate(correct ? 20 : [30, 50, 30]);
+
+  const verdict = document.getElementById('verdict');
+  verdict.className = 'result-verdict ' + (correct ? 'ok' : 'ng');
+  verdict.innerHTML = correct ? `正解 <small>CORRECT</small>` : `不正解 <small>INCORRECT</small>`;
+  document.getElementById('answerLine').innerHTML = `正解は <strong>${q.answer ? '○ 正しい' : '× 誤り'}</strong>`;
+  document.getElementById('explanation').textContent = q.explanation;
+  document.getElementById('reference').textContent = q.reference;
+  document.getElementById('resultPanel').classList.add('show');
+  document.getElementById('nextBtn').classList.add('show');
+  document.getElementById('nextBtn').textContent = session.index === session.questions.length - 1 ? '結果を見る' : '次の問題へ';
+  document.getElementById('progressFill').style.width = `${((session.index + 1) / session.questions.length) * 100}%`;
+}
+
+function nextQuestion() {
+  session.index++;
+  if (session.index >= session.questions.length) showComplete();
+  else renderQuestion();
+}
+
+function showComplete() {
+  document.getElementById('finalScore').textContent = session.correct;
+  document.getElementById('finalTotal').textContent = session.questions.length;
+  const rate = Math.round((session.correct / session.questions.length) * 100);
+  document.getElementById('finalRate').textContent = `正答率 ${rate}%`;
+  const seal = document.getElementById('sealText');
+  if (rate >= 80) { seal.textContent = '優秀'; seal.style.color = 'var(--correct)'; seal.style.borderColor = 'var(--correct)'; }
+  else if (rate >= 60) { seal.textContent = '合格'; seal.style.color = 'var(--accent)'; seal.style.borderColor = 'var(--accent)'; }
+  else { seal.textContent = '要復習'; seal.style.color = 'var(--ink-soft)'; seal.style.borderColor = 'var(--ink-soft)'; }
+  showScreen('complete');
+}
+
+function retryWrong() {
+  if (session.wrongIds.length === 0) { alert('全問正解でした！'); return; }
+  const qs = getCurrentData().questions.filter(q => session.wrongIds.includes(q.id));
+  startQuiz(shuffle(qs));
+}
+
+// =================================
+// 試験モード（択一式）
+// =================================
+function startExam(subjectId) {
+  const exams = getCurrentData().exams.filter(e => e.subject === subjectId);
+  if (exams.length === 0) return;
+  examSession = {
+    subjectId,
+    subjectName: SUBJECTS.find(s => s.id === subjectId).name,
+    questions: exams,
+    index: 0,
+    answers: {},
+    flags: new Set(),
+    startTime: Date.now(),
+    submitted: false,
+    reviewing: false
+  };
+  showScreen('exam');
+  startExamTimer();
+  renderExamQuestion();
+}
+
+function startExamTimer() {
+  const el = document.getElementById('examTimer');
+  const update = () => {
+    const elapsed = Math.floor((Date.now() - examSession.startTime) / 1000);
+    const h = Math.floor(elapsed / 3600);
+    const m = Math.floor((elapsed % 3600) / 60);
+    const s = elapsed % 60;
+    el.textContent = h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  };
+  update();
+  if (examTimerInterval) clearInterval(examTimerInterval);
+  examTimerInterval = setInterval(update, 1000);
+}
+
+function renderExamQuestion() {
+  const q = examSession.questions[examSession.index];
+  const selected = examSession.answers[q.id];
+  const flagged = examSession.flags.has(q.id);
+
+  const flagBtn = document.getElementById('examFlagBtn');
+  if (flagged) { flagBtn.classList.add('active'); flagBtn.textContent = '▲'; }
+  else { flagBtn.classList.remove('active'); flagBtn.textContent = '△'; }
+
+  document.getElementById('examProgressBtn').textContent = `${examSession.index + 1} / ${examSession.questions.length}`;
+
+  const body = document.getElementById('examBody');
+  body.innerHTML = `
+    <div class="exam-q-title mincho">${q.year}年度 ${q.subjectName} ${q.qNumber}</div>
+    <div class="exam-q-instruction mincho">${q.instruction.replace(/\n/g, '<br>')}</div>
+    <div class="choice-list">
+      ${q.choices.map(c => `
+        <button class="choice-item ${selected === c.label ? 'selected' : ''}" onclick="selectChoice('${c.label}')">
+          <span class="choice-label">${c.label}</span>${c.text}
+        </button>
+      `).join('')}
+    </div>
+    <div class="exam-nav">
+      <button class="exam-nav-btn" onclick="examPrev()" ${examSession.index === 0 ? 'disabled' : ''}>← 前の問題</button>
+      <button class="exam-nav-btn primary" onclick="examNext()" ${examSession.index === examSession.questions.length - 1 ? 'disabled' : ''}>次の問題 →</button>
+    </div>
+  `;
+  body.scrollTo(0, 0);
+  document.getElementById('examSubmitBtn').classList.add('show');
+}
+
+function selectChoice(label) {
+  const q = examSession.questions[examSession.index];
+  examSession.answers[q.id] = label;
+  document.querySelectorAll('#exam .choice-item').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function toggleExamFlag() {
+  const q = examSession.questions[examSession.index];
+  if (examSession.flags.has(q.id)) examSession.flags.delete(q.id);
+  else examSession.flags.add(q.id);
+  const flagBtn = document.getElementById('examFlagBtn');
+  if (examSession.flags.has(q.id)) { flagBtn.classList.add('active'); flagBtn.textContent = '▲'; }
+  else { flagBtn.classList.remove('active'); flagBtn.textContent = '△'; }
+}
+
+function examPrev() { if (examSession.index > 0) { examSession.index--; renderExamQuestion(); } }
+function examNext() { if (examSession.index < examSession.questions.length - 1) { examSession.index++; renderExamQuestion(); } }
+
+function openExamOverview() {
+  const grid = document.getElementById('examGrid');
+  grid.innerHTML = examSession.questions.map((q, i) => {
+    const answered = examSession.answers[q.id] !== undefined;
+    const flagged = examSession.flags.has(q.id);
+    const current = i === examSession.index;
+    return `<div class="q-cell ${answered ? 'answered' : ''} ${flagged ? 'flagged' : ''} ${current ? 'current' : ''}" onclick="jumpToQuestion(${i})">${i + 1}</div>`;
+  }).join('');
+  document.getElementById('examOverlay').classList.add('show');
+}
+function closeExamOverview(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('examOverlay').classList.remove('show');
+}
+function jumpToQuestion(idx) { examSession.index = idx; closeExamOverview(); renderExamQuestion(); }
+
+function confirmExitExam() {
+  if (examSession && examSession.submitted && examSession.reviewing) { backToExamResult(); return; }
+  if (!examSession) { goHome(); return; }
+  const answered = Object.keys(examSession.answers).length;
+  if (answered === 0 || examSession.submitted) { goHome(); return; }
+  if (confirm('試験を中断してホームに戻りますか？\n解答内容は保存されません。')) goHome();
+}
+
+function confirmSubmitExam() {
+  const answered = Object.keys(examSession.answers).length;
+  const total = examSession.questions.length;
+  const unanswered = total - answered;
+  let msg = unanswered > 0 ? `未解答が ${unanswered} 問あります。このまま採点しますか？` : '採点を開始します。よろしいですか？';
+  if (confirm(msg)) submitExam();
+}
+
+function submitExam() {
+  examSession.submitted = true;
+  clearInterval(examTimerInterval);
+  examTimerInterval = null;
+  let correct = 0;
+  examSession.questions.forEach(q => {
+    const userAns = examSession.answers[q.id];
+    // 複数正解対応：correctLabelが"C"のみだが、choicesでcorrect:trueのものも考慮
+    const correctLabels = q.choices.filter(c => c.correct).map(c => c.label);
+    if (correctLabels.includes(userAns)) correct++;
+  });
+  const duration = Math.floor((Date.now() - examSession.startTime) / 1000);
+  state.examHistory.push({ subjectId: examSession.subjectId, year: state.currentYear, date: Date.now(), score: correct, total: examSession.questions.length, duration });
+  saveState();
+  renderExamResult(correct, duration);
+  showScreen('examResult');
+  document.getElementById('examResultSub').textContent = 'EXAM RESULT';
+}
+
+function renderExamResult(correct, duration) {
+  const total = examSession.questions.length;
+  const rate = Math.round((correct / total) * 100);
+  const passRate = Math.ceil(total * 0.4);
+  const passed = correct >= passRate;
+  const hours = Math.floor(duration / 3600);
+  const mins = Math.floor((duration % 3600) / 60);
+  const secs = duration % 60;
+  const timeStr = hours > 0 ? `${hours}時間${mins}分${secs}秒` : `${mins}分${secs}秒`;
+  let sealChar, sealColor;
+  if (rate >= 80) { sealChar = '優秀'; sealColor = 'var(--correct)'; }
+  else if (passed) { sealChar = '合格'; sealColor = 'var(--accent)'; }
+  else { sealChar = '要復習'; sealColor = 'var(--ink-soft)'; }
+
+  document.getElementById('examResultBody').innerHTML = `
+    <div class="complete-seal mincho" style="color:${sealColor};border-color:${sealColor}">${sealChar}</div>
+    <div class="complete-title mincho">${examSession.subjectName}</div>
+    <div class="complete-score mincho">${correct}<small> / ${total}</small></div>
+    <div class="complete-detail">正答率 ${rate}%（合格基準 ${passRate}点以上）</div>
+    <div class="complete-time mincho">所要時間 ${timeStr}</div>
+    <div class="result-table">
+      <div class="result-row header"><div class="rq">問題</div><div class="rans">解答／正解</div><div>状態</div><div class="rcor">判定</div></div>
+      ${examSession.questions.map(q => {
+        const a = examSession.answers[q.id];
+        const correctLabels = q.choices.filter(c => c.correct).map(c => c.label);
+        const isCorrect = correctLabels.includes(a);
+        const skipped = !a;
+        const correctDisplay = correctLabels.length > 1 ? correctLabels.join('/') : correctLabels[0];
+        return `
+          <div class="result-row clickable" onclick="showExamDetail('${q.id}')">
+            <div class="rq">${q.qNumber}</div>
+            <div class="rans">${a || '—'} / <span style="color:var(--accent)">${correctDisplay}</span></div>
+            <div style="font-size:11px;color:var(--ink-soft)">タップで解説</div>
+            <div class="rcor ${skipped ? 'skip' : (isCorrect ? 'ok' : 'ng')}">${skipped ? '—' : (isCorrect ? '○' : '×')}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="complete-actions">
+      <button class="complete-btn" onclick="goHome()">ホームへ戻る</button>
+      <button class="complete-btn secondary" onclick="retryExam()">もう一度挑戦</button>
+    </div>
+  `;
+}
+
+function showExamDetail(qid) {
+  const q = examSession.questions.find(x => x.id === qid);
+  if (!q) return;
+  examSession.reviewing = true;
+  const userAns = examSession.answers[q.id];
+  const correctLabels = q.choices.filter(c => c.correct).map(c => c.label);
+  const isCorrect = correctLabels.includes(userAns);
+  showScreen('exam');
+  const body = document.getElementById('examBody');
+  body.innerHTML = `
+    <div class="exam-q-title mincho">${q.year}年度 ${q.subjectName} ${q.qNumber} ・ 解説</div>
+    <div class="exam-q-instruction mincho">${q.instruction.replace(/\n/g, '<br>')}</div>
+    <div style="margin-bottom:14px;padding:10px 14px;background:${isCorrect?'#eaf0ea':(userAns?'#f0e8e8':'var(--paper)')};border:1px solid ${isCorrect?'var(--correct)':(userAns?'var(--wrong)':'var(--line)')};font-family:'Shippori Mincho',serif;font-size:13px;letter-spacing:0.05em">
+      あなたの解答: <strong>${userAns || '未解答'}</strong> ／ 正解: <strong style="color:var(--accent)">${correctLabels.join(' または ')}</strong>
+      ${userAns ? ` <span style="float:right;color:${isCorrect?'var(--correct)':'var(--wrong)'}">${isCorrect?'○ 正解':'× 不正解'}</span>` : ''}
+    </div>
+    <div class="choice-list">
+      ${q.choices.map(c => {
+        let cls = '';
+        if (correctLabels.includes(c.label)) cls = 'correct-answer';
+        else if (c.label === userAns) cls = 'wrong-selected';
+        return `
+          <div class="choice-item ${cls}">
+            <span class="choice-label">${c.label}</span>${c.text}
+            <div class="choice-explain show">${c.explain || ''}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-family:'Shippori Mincho',serif;font-size:12px;color:var(--accent);letter-spacing:0.05em">§ ${q.reference}</div>
+    <div class="exam-nav" style="margin-top:20px"><button class="exam-nav-btn" onclick="backToExamResult()">← 結果に戻る</button></div>
+  `;
+  document.getElementById('examSubmitBtn').classList.remove('show');
+  document.getElementById('examFlagBtn').style.display = 'none';
+  document.getElementById('examProgressBtn').style.display = 'none';
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  document.getElementById('examTimer').textContent = '解説';
+  document.getElementById('examTimer').style.fontSize = '14px';
+  body.scrollTo(0, 0);
+}
+
+function backToExamResult() {
+  if (examSession) examSession.reviewing = false;
+  document.getElementById('examFlagBtn').style.display = '';
+  document.getElementById('examProgressBtn').style.display = '';
+  document.getElementById('examTimer').style.fontSize = '';
+  showScreen('examResult');
+}
+
+function retryExam() {
+  document.getElementById('examFlagBtn').style.display = '';
+  document.getElementById('examProgressBtn').style.display = '';
+  document.getElementById('examTimer').style.fontSize = '';
+  startExam(examSession.subjectId);
+}
+
+// =================================
+// 選択式モード
+// =================================
+function startSentaku(subjectId) {
+  const items = getCurrentData().sentaku.filter(s => s.subject === subjectId);
+  if (items.length === 0) return;
+  sentakuSession = {
+    subjectId,
+    subjectName: SUBJECTS.find(s => s.id === subjectId).name,
+    item: items[0], // 1科目につき1セット
+    answers: {},    // { label: choiceNum }
+    startTime: Date.now(),
+    submitted: false,
+    reviewing: false
+  };
+  activeBlankLabel = null;
+  showScreen('sentaku');
+  startSentakuTimer();
+  renderSentaku();
+}
+
+function startSentakuTimer() {
+  const el = document.getElementById('sentakuTimer');
+  const update = () => {
+    const elapsed = Math.floor((Date.now() - sentakuSession.startTime) / 1000);
+    const h = Math.floor(elapsed / 3600);
+    const m = Math.floor((elapsed % 3600) / 60);
+    const s = elapsed % 60;
+    el.textContent = h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  };
+  update();
+  if (sentakuTimerInterval) clearInterval(sentakuTimerInterval);
+  sentakuTimerInterval = setInterval(update, 1000);
+}
+
+function renderSentaku() {
+  const s = sentakuSession;
+  const item = s.item;
+  const answers = s.answers;
+  const body = document.getElementById('sentakuBody');
+
+  // 本文をレンダリング（空欄を置換）
+  const renderPassage = (text) => {
+    return text.replace(/\{([A-E])\}/g, (match, label) => {
+      const filled = answers[label] !== undefined;
+      const active = activeBlankLabel === label && !s.submitted;
+      let cls = 'blank-slot';
+      if (filled) cls += ' filled';
+      if (active) cls += ' active';
+      if (s.submitted) {
+        const blank = item.blanks.find(b => b.label === label);
+        if (answers[label] === blank.correct) cls += ' correct';
+        else cls += ' wrong';
+      }
+      let content;
+      if (filled) {
+        const cn = answers[label];
+        // 雇用のgroup対応と労災を区別
+        const choice = item.choices.find(c => c.num === cn && (!c.group || c.group === label));
+        content = choice ? choice.text : `(${cn})`;
+      } else {
+        content = '　';
+      }
+      return `<span class="${cls}" onclick="selectBlank('${label}')"><span class="blank-label">${label}</span>${content}</span>`;
+    });
+  };
+
+  const passagesHtml = item.passages.map(p => `
+    <div style="margin-bottom: 14px;">
+      <div style="font-family:'Shippori Mincho',serif;font-size:13px;color:var(--accent);letter-spacing:0.1em;margin-bottom:4px;">${p.title}</div>
+      <div>${renderPassage(p.text)}</div>
+    </div>
+  `).join('');
+
+  // 採点済のときは選択肢を非表示、解説を表示
+  let choicesHtml = '';
+  if (!s.submitted) {
+    // 雇用保険の場合はgroupで絞る、労災の場合は全選択肢から
+    let shownChoices = item.choices;
+    if (activeBlankLabel && item.choices.some(c => c.group)) {
+      shownChoices = item.choices.filter(c => c.group === activeBlankLabel);
+    }
+    // 既に使用されている選択肢（同じ群内）を判定
+    const usedNums = Object.entries(answers)
+      .filter(([l, _]) => l !== activeBlankLabel)
+      .map(([_, n]) => n);
+    choicesHtml = `
+      <div class="sentaku-choices-wrap">
+        <div class="sentaku-choices-label">
+          <span>${activeBlankLabel ? `空欄 ${activeBlankLabel} の選択肢` : '空欄をタップして選択肢を選んでください'}</span>
+          ${activeBlankLabel && answers[activeBlankLabel] !== undefined ? `<button onclick="clearBlank()" style="background:none;border:none;color:var(--accent);font-size:10px;cursor:pointer">クリア</button>` : ''}
+        </div>
+        <div class="sentaku-choices">
+          ${activeBlankLabel ? shownChoices.map(c => {
+            const used = usedNums.includes(c.num) && (!c.group); // groupあり(雇用)なら重複OK
+            return `
+              <button class="sentaku-choice ${used ? 'used' : ''}" ${used ? 'disabled' : ''} onclick="pickChoice(${c.num})">
+                <span class="sc-num">${c.num}</span>${c.text}
+              </button>
+            `;
+          }).join('') : '<div style="padding: 10px 22px; font-size: 11.5px; color: var(--ink-faint);">文中の空欄（A〜E）をタップしてください</div>'}
+        </div>
+      </div>
+    `;
+  }
+
+  let instructionInfo = `
+    <div class="exam-q-title mincho">${item.year}年度 ${item.subjectName} 選択式 ${item.qNumber}</div>
+    <div style="font-size:11px;color:var(--ink-faint);letter-spacing:0.1em;margin-bottom:14px;">文中の【A】〜【E】を選択肢から埋めて完全な文章としなさい。</div>
+  `;
+
+  body.innerHTML = instructionInfo + `<div class="sentaku-text">${passagesHtml}</div>` + choicesHtml;
+
+  // 未採点時のみ採点ボタン表示
+  if (!s.submitted) document.getElementById('sentakuSubmitBtn').classList.add('show');
+  else document.getElementById('sentakuSubmitBtn').classList.remove('show');
+}
+
+function selectBlank(label) {
+  if (sentakuSession.submitted) return;
+  activeBlankLabel = (activeBlankLabel === label) ? null : label;
+  renderSentaku();
+}
+
+function pickChoice(num) {
+  if (!activeBlankLabel) return;
+  sentakuSession.answers[activeBlankLabel] = num;
+  // 自動的に次の空欄へ
+  const order = ['A','B','C','D','E'];
+  const nextLabel = order.find(l => l !== activeBlankLabel && sentakuSession.answers[l] === undefined);
+  activeBlankLabel = nextLabel || null;
+  renderSentaku();
+}
+
+function clearBlank() {
+  if (!activeBlankLabel) return;
+  delete sentakuSession.answers[activeBlankLabel];
+  renderSentaku();
+}
+
+function openSentakuOverview() {
+  const grid = document.getElementById('sentakuGrid');
+  const labels = ['A','B','C','D','E'];
+  grid.innerHTML = labels.map(l => {
+    const answered = sentakuSession.answers[l] !== undefined;
+    const current = activeBlankLabel === l;
+    return `<div class="q-cell ${answered ? 'answered' : ''} ${current ? 'current' : ''}" onclick="jumpSentaku('${l}')">${l}</div>`;
+  }).join('');
+  document.getElementById('sentakuOverlay').classList.add('show');
+}
+function closeSentakuOverview(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('sentakuOverlay').classList.remove('show');
+}
+function jumpSentaku(label) {
+  activeBlankLabel = label;
+  closeSentakuOverview();
+  renderSentaku();
+}
+
+function confirmExitSentaku() {
+  if (sentakuSession && sentakuSession.submitted) { goHome(); return; }
+  if (!sentakuSession) { goHome(); return; }
+  const answered = Object.keys(sentakuSession.answers).length;
+  if (answered === 0) { goHome(); return; }
+  if (confirm('選択式を中断してホームに戻りますか？\n解答内容は保存されません。')) goHome();
+}
+
+function confirmSubmitSentaku() {
+  const answered = Object.keys(sentakuSession.answers).length;
+  const unanswered = 5 - answered;
+  let msg = unanswered > 0 ? `未解答が ${unanswered} 空欄あります。このまま採点しますか？` : '採点を開始します。よろしいですか？';
+  if (confirm(msg)) submitSentaku();
+}
+
+function submitSentaku() {
+  sentakuSession.submitted = true;
+  clearInterval(sentakuTimerInterval);
+  sentakuTimerInterval = null;
+  const item = sentakuSession.item;
+  let correct = 0;
+  item.blanks.forEach(b => {
+    if (sentakuSession.answers[b.label] === b.correct) correct++;
+  });
+  const duration = Math.floor((Date.now() - sentakuSession.startTime) / 1000);
+  state.sentakuHistory.push({ subjectId: sentakuSession.subjectId, year: state.currentYear, date: Date.now(), score: correct, total: 5, duration });
+  saveState();
+  activeBlankLabel = null;
+  renderSentakuResult(correct, duration);
+  showScreen('examResult');
+  document.getElementById('examResultSub').textContent = 'SENTAKU RESULT';
+}
+
+function renderSentakuResult(correct, duration) {
+  const item = sentakuSession.item;
+  const rate = Math.round((correct / 5) * 100);
+  const passed = correct >= 3;
+  const hours = Math.floor(duration / 3600);
+  const mins = Math.floor((duration % 3600) / 60);
+  const secs = duration % 60;
+  const timeStr = hours > 0 ? `${hours}時間${mins}分${secs}秒` : `${mins}分${secs}秒`;
+  let sealChar, sealColor;
+  if (correct === 5) { sealChar = '満点'; sealColor = 'var(--correct)'; }
+  else if (passed) { sealChar = '合格'; sealColor = 'var(--accent)'; }
+  else { sealChar = '要復習'; sealColor = 'var(--ink-soft)'; }
+
+  document.getElementById('examResultBody').innerHTML = `
+    <div class="complete-seal mincho" style="color:${sealColor};border-color:${sealColor}">${sealChar}</div>
+    <div class="complete-title mincho">${sentakuSession.subjectName} 選択式</div>
+    <div class="complete-score mincho">${correct}<small> / 5</small></div>
+    <div class="complete-detail">正答率 ${rate}%（合格基準 3点以上）</div>
+    <div class="complete-time mincho">所要時間 ${timeStr}</div>
+    <div class="result-table">
+      <div class="result-row header"><div class="rq">空欄</div><div class="rans">解答／正解</div><div>解説</div><div class="rcor">判定</div></div>
+      ${item.blanks.map(b => {
+        const userNum = sentakuSession.answers[b.label];
+        const userChoice = item.choices.find(c => c.num === userNum && (!c.group || c.group === b.label));
+        const correctChoice = item.choices.find(c => c.num === b.correct && (!c.group || c.group === b.label));
+        const isCorrect = userNum === b.correct;
+        const skipped = userNum === undefined;
+        return `
+          <div class="result-row" style="grid-template-columns: 42px 1fr 32px;">
+            <div class="rq">${b.label}</div>
+            <div style="font-size:11.5px;">
+              <div style="color:var(--ink-soft)">解答: ${skipped ? '未解答' : (userChoice ? userChoice.text : '-')}</div>
+              <div style="color:var(--accent);font-weight:500;margin-top:2px;">正解: ${correctChoice ? correctChoice.text : '-'}</div>
+              <div style="color:var(--ink-soft);margin-top:6px;font-size:11px;line-height:1.6;">${b.explain}</div>
+            </div>
+            <div class="rcor ${skipped ? 'skip' : (isCorrect ? 'ok' : 'ng')}">${skipped ? '—' : (isCorrect ? '○' : '×')}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div style="margin:0 0 20px;padding:10px 14px;border:1px dashed var(--line);font-family:'Shippori Mincho',serif;font-size:12px;color:var(--accent);letter-spacing:0.05em;">§ ${item.reference}</div>
+    <div class="complete-actions">
+      <button class="complete-btn" onclick="goHome()">ホームへ戻る</button>
+      <button class="complete-btn secondary" onclick="startSentaku('${sentakuSession.subjectId}')">もう一度挑戦</button>
+    </div>
+  `;
+}
+
+// Init
+loadState();
+renderHome();
+</script>
+</body>
+</html>
