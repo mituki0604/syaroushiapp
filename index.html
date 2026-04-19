@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+/* CSS内の全角ハイフン・全角クォーテーションをすべて半角に修正しました */
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
   --bg: #f5f1ea; --bg-deep: #ebe4d6; --ink: #1a1613; --ink-soft: #5a5047; --ink-faint: #8a7d6f;
@@ -41,9 +42,25 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .hero-kanji { font-family: 'Shippori Mincho', serif; font-size: 36px; font-weight: 700; letter-spacing: 0.18em; color: var(--ink); margin-bottom: 4px; }
 .hero-sub { font-size: 10px; letter-spacing: 0.4em; color: var(--ink-faint); }
 
-.year-tabs { display: flex; gap: 6px; margin-bottom: 16px; padding: 3px; background: var(--paper); border: 1px solid var(--line); }
-.year-tab { flex: 1; padding: 8px; background: transparent; border: none; font-family: 'Shippori Mincho', serif; font-size: 12px; letter-spacing: 0.1em; cursor: pointer; color: var(--ink-soft); }
-.year-tab.active { background: var(--ink); color: var(--bg); }
+.year-select-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 10px 14px; background: var(--paper); border: 1px solid var(--line); }
+.year-select-label { font-family: 'Shippori Mincho', serif; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.15em; }
+.year-select { background: transparent; border: none; font-family: 'Shippori Mincho', serif; font-size: 14px; color: var(--ink); font-weight: 600; padding: 4px 24px 4px 8px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%238a7d6f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; background-size: 8px; }
+
+.range-modal-content { padding: 4px 0 8px; }
+.range-row { margin-bottom: 14px; }
+.range-row-label { font-size: 10.5px; color: var(--ink-faint); letter-spacing: 0.2em; margin-bottom: 6px; font-family: 'Shippori Mincho', serif; }
+.range-selects { display: flex; align-items: center; gap: 8px; }
+.range-select { flex: 1; padding: 10px 12px; background: var(--paper); border: 1px solid var(--line); font-family: 'Shippori Mincho', serif; font-size: 13px; color: var(--ink); appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%238a7d6f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 8px; padding-right: 26px; }
+.range-tilde { font-family: 'Shippori Mincho', serif; color: var(--ink-faint); font-size: 14px; }
+.range-check-list { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 14px; }
+.range-check-item { background: var(--paper); padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-size: 13px; }
+.range-check-item:active { background: var(--bg-deep); }
+.range-check-item .cb { width: 18px; height: 18px; border: 1.5px solid var(--ink-soft); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.range-check-item.checked .cb { background: var(--ink); border-color: var(--ink); color: var(--bg); font-size: 12px; }
+.range-check-item.checked .cb::before { content: "✓"; }
+.range-info { font-size: 11.5px; color: var(--ink-soft); padding: 10px 12px; background: var(--bg-deep); border-left: 3px solid var(--accent); margin-bottom: 14px; font-family: 'Shippori Mincho', serif; line-height: 1.6; }
+.range-start-btn { width: 100%; padding: 14px; background: var(--ink); color: var(--bg); border: none; font-family: 'Shippori Mincho', serif; font-size: 14px; letter-spacing: 0.2em; cursor: pointer; }
+.range-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; border: 1px solid var(--line); background: var(--paper); }
 .stat { padding: 11px 4px; text-align: center; border-right: 1px solid var(--line); }
@@ -95,7 +112,7 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .bookmark-btn.active { color: var(--pin); }
 .flag-btn.active { color: var(--flag); }
 
-.quiz-body { flex: 1; overflow-y: auto; padding: 16px 22px 130px; -webkit-overflow-scrolling: touch; }
+.quiz-body { flex: 1; overflow-y: auto; padding: 16px 22px 24px; -webkit-overflow-scrolling: touch; }
 .meta-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
 .tag { font-size: 10px; letter-spacing: 0.12em; padding: 3px 9px; border: 1px solid var(--line); color: var(--ink-soft); background: var(--paper); }
 .tag.accent { border-color: var(--accent); color: var(--accent); }
@@ -128,7 +145,14 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .reference { font-family: 'Shippori Mincho', serif; font-size: 12px; color: var(--accent); padding-top: 10px; border-top: 1px dashed var(--line); letter-spacing: 0.05em; }
 .reference::before { content: "§ "; }
 
-.next-btn, .submit-btn { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: calc(100% - 44px); max-width: 476px; padding: 15px; background: var(--ink); color: var(--bg); border: none; font-family: 'Shippori Mincho', serif; font-size: 14px; letter-spacing: 0.25em; cursor: pointer; display: none; box-shadow: 0 4px 20px rgba(26, 22, 19, 0.15); }
+.next-btn, .submit-btn {
+display: none;
+width: 100%; padding: 15px;
+background: var(--ink); color: var(--bg); border: none;
+font-family: 'Shippori Mincho', serif; font-size: 14px; letter-spacing: 0.25em;
+cursor: pointer; margin-top: 16px;
+box-shadow: 0 2px 8px rgba(26,22,19,0.1);
+}
 .next-btn.show, .submit-btn.show { display: block; animation: slideUp 0.3s ease; }
 .next-btn:active { background: var(--accent); }
 .submit-btn { background: var(--accent); }
@@ -140,7 +164,7 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .exam-num-btn { background: var(--paper); border: 1px solid var(--line); padding: 5px 10px; font-size: 11px; letter-spacing: 0.1em; font-family: 'Shippori Mincho', serif; cursor: pointer; color: var(--ink-soft); }
 .exam-num-btn:active { background: var(--bg-deep); }
 
-.exam-body { flex: 1; overflow-y: auto; padding: 16px 22px 130px; -webkit-overflow-scrolling: touch; }
+.exam-body { flex: 1; overflow-y: auto; padding: 16px 22px 32px; -webkit-overflow-scrolling: touch; }
 .exam-q-title { font-family: 'Shippori Mincho', serif; font-size: 14px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
 .exam-q-instruction { font-family: 'Shippori Mincho', serif; font-size: 15px; line-height: 1.85; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px dashed var(--line); letter-spacing: 0.03em; }
 
@@ -164,14 +188,14 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .exam-nav-btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
 /* 選択式モード */
-.sentaku-body { flex: 1; overflow-y: auto; padding: 16px 22px 130px; -webkit-overflow-scrolling: touch; }
-.sentaku-text { font-family: 'Shippori Mincho', serif; font-size: 15px; line-height: 2.2; letter-spacing: 0.03em; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed var(--line); }
+.sentaku-body { flex: 1; overflow-y: auto; padding: 16px 22px 16px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
+.sentaku-text { font-family: 'Shippori Mincho', serif; font-size: 15px; line-height: 2.2; letter-spacing: 0.03em; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px dashed var(--line); }
 .blank-slot {
-  display: inline-block; min-width: 60px; padding: 2px 10px; margin: 0 2px;
-  border: 1.5px solid var(--line); background: var(--paper);
-  font-family: 'Shippori Mincho', serif; font-size: 13.5px; color: var(--ink-soft);
-  cursor: pointer; position: relative; border-radius: 3px; transition: all 0.15s;
-  text-align: center; vertical-align: middle;
+display: inline-block; min-width: 60px; padding: 2px 10px; margin: 0 2px;
+border: 1.5px solid var(--line); background: var(--paper);
+font-family: 'Shippori Mincho', serif; font-size: 13.5px; color: var(--ink-soft);
+cursor: pointer; position: relative; border-radius: 3px; transition: all 0.15s;
+text-align: center; vertical-align: middle;
 }
 .blank-slot.filled { background: #fdfbf6; color: var(--ink); border-color: var(--ink); border-width: 2px; padding: 1px 9px; }
 .blank-slot.active { border-color: var(--accent); background: #fffbf6; box-shadow: 0 0 0 3px rgba(139, 46, 46, 0.15); }
@@ -179,7 +203,10 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .blank-slot.wrong { border-color: var(--wrong); background: #f5eded; color: var(--wrong); }
 .blank-label { position: absolute; top: -14px; left: 0; font-size: 10px; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; }
 
-.sentaku-choices-wrap { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 10px 0; margin: 0 -22px; }
+.sentaku-choices-wrap { background: var(--bg); border-top: 1px solid var(--line); padding: 12px 0 4px; margin: auto -22px 0; position: sticky; bottom: 0; }
+.sentaku-submit-inline { display: block; margin: 10px 22px 14px; padding: 14px; width: calc(100% - 44px); background: var(--accent); color: var(--bg); border: none; font-family: 'Shippori Mincho', serif; font-size: 14px; letter-spacing: 0.25em; cursor: pointer; box-shadow: 0 2px 8px rgba(26, 22, 19, 0.1); }
+.sentaku-submit-inline:active { background: var(--ink); }
+.sentaku-submit-inline:disabled { background: var(--ink-faint); cursor: not-allowed; }
 .sentaku-choices-label { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2em; margin: 0 22px 8px; display: flex; justify-content: space-between; }
 .sentaku-choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; padding: 0 22px; max-height: 220px; overflow-y: auto; }
 .sentaku-choice { background: var(--paper); border: 1px solid var(--line); padding: 8px 10px 8px 28px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-size: 12px; line-height: 1.5; text-align: left; color: var(--ink); position: relative; }
@@ -240,6 +267,7 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
 .footnote { padding: 11px 22px; text-align: center; font-size: 9.5px; color: var(--ink-faint); letter-spacing: 0.18em; border-top: 1px solid var(--line); flex-shrink: 0; }
 .loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; color: var(--ink-soft); font-family: 'Shippori Mincho', serif; }
 </style>
+
 </head>
 <body>
 <div id="app">
@@ -262,7 +290,6 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
       <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">☆</button>
     </div>
     <div class="quiz-body" id="quizBody"></div>
-    <button class="next-btn mincho" id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
   </section>
 
   <section class="screen" id="exam">
@@ -274,7 +301,6 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
       <button class="exam-num-btn mincho" onclick="openExamOverview()" id="examProgressBtn">一覧</button>
     </div>
     <div class="exam-body" id="examBody"></div>
-    <button class="submit-btn mincho" id="examSubmitBtn" onclick="confirmSubmitExam()">採点する</button>
   </section>
 
   <section class="screen" id="sentaku">
@@ -285,7 +311,6 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
       <button class="exam-num-btn mincho" onclick="openSentakuOverview()" id="sentakuProgressBtn">一覧</button>
     </div>
     <div class="sentaku-body" id="sentakuBody"></div>
-    <button class="submit-btn mincho" id="sentakuSubmitBtn" onclick="confirmSubmitSentaku()">採点する</button>
   </section>
 
   <div class="overlay" id="examOverlay" onclick="closeExamOverview(event)">
@@ -320,6 +345,17 @@ header .subtitle { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.2
           <span><span class="dot answered"></span>解答済</span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="rangeOverlay" onclick="closeRangeModal(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title mincho">年度横断ランダム</div>
+        <button class="sheet-close" onclick="closeRangeModal()">×</button>
+      </div>
+      <div class="sheet-body" id="rangeBody"></div>
     </div>
   </div>
 
@@ -440,7 +476,7 @@ DATA.r5.exams.forEach(e => {
     DATA.r5.questions.push({
       id: `${e.id}-${c.label.toLowerCase()}`,
       subject: e.subject, subjectName: e.subjectName, qNumber: e.qNumber, choice: c.label, year: e.year,
-      context: null, // 一問一答は肢単独で判定
+      context: e.instruction, // 問題本体の前提文を表示
       question: c.text,
       answer: ansBool,
       explanation: (ansBool ? "正しい。" : "誤り。") + (c.explain || ""),
@@ -723,7 +759,7 @@ DATA.r6.exams.forEach(e => {
     DATA.r6.questions.push({
       id: `${e.id}-${c.label.toLowerCase()}`,
       subject: e.subject, subjectName: e.subjectName, qNumber: e.qNumber, choice: c.label, year: e.year,
-      context: null,
+      context: e.instruction,
       question: c.text,
       answer: c.correct,
       explanation: (c.correct ? "正しい。" : "誤り。") + (c.explain || ""),
@@ -738,9 +774,8 @@ DATA.r6.sentaku = [
     id: "r6-sentaku-rousai",
     subject: "rousai", subjectName: "労災・徴収",
     year: "R6", qNumber: "問2",
-    // 本文（{A},{B},{C},{D},{E}で空欄表示）
     passages: [
-      { title: "1", text: "労災保険法施行規則第14条第1項は、「障害補償給付を支給すべき身体障害の障害等級は、別表第1に定めるところによる。」と規定し、同条第2項は、「別表第1に掲げる身体障害が2以上ある場合には、重い方の身体障害の該当する障害等級による。」と規定するが、同条第3項柱書きは、「第{A}級以上に該当する身体障害が2以上あるとき」は「前2項の規定による障害等級」を「2級」繰り上げた等級、「第{B}級以上に該当する身体障害が2以上あるとき」は「前2項の規定による障害等級」を「3級」繰り上げた等級によるとする。" },
+      { title: "1", text: "労災保険法施行規則第14条第1項は、「障害補償給付を支給すべき身体障害の障害等級は、別表第1に定めるところによる。」と規定し、同条第2項は、「別表第1に掲げる身体障害が2以上ある場合には、重い方の身体障害の該当する障害等級による。」と規定するが、同条第3項柱書きは、「第{A}級以上に該当する身体障害が2以上あるとき」は「前2項の規定による障害等級」を「2級」繰り上げた等級、「第{B}級以上に該当する身体障害が2以上あるとき」は「前2項の規定による障害等級」を「3級」繰上げた等級によるとする。" },
       { title: "2", text: "年金たる保険給付の支給は、支給すべき事由が生じた{C}から始め、支給を受ける権利が消滅した月で終わるものとする。また、保険給付を受ける権利を有する者が死亡した場合において、その死亡した者に支給すべき保険給付でまだその者に支給しなかったものがあるときは、その者の配偶者、子、父母、孫、祖父母又は兄弟姉妹であって、その者の死亡の当時その者と生計を同じくしていたものは、{D}の名で、その未支給の保険給付の支給を請求することができる。" },
       { title: "3", text: "最高裁判所は、遺族補償年金に関して次のように判示した。「労災保険法に基づく保険給付は、その制度の趣旨目的に従い、特定の損害について必要額を塡補するために支給されるものであり、遺族補償年金は、労働者の死亡による遺族の{E}を塡補することを目的とするものであって、その塡補の対象とする損害は、被害者の死亡による逸失利益等の消極損害と同性質であり、かつ、相互補完性があるものと解される。」" }
     ],
@@ -778,39 +813,31 @@ DATA.r6.sentaku = [
       { label: "E", correct: 3, explain: "X社18時間（主たる雇用）は高年齢被保険者の要件（週20時間以上）を満たさず、特例高年齢被保険者の申出もしていないため雇用保険法の適用除外となる。" }
     ],
     choices: [
-      // 各空欄ごとに選択肢が異なる形式（原典のとおり）
       { num: 1, text: "一般被保険者であるときのみ", group: "A" },
       { num: 2, text: "一般被保険者又は高年齢被保険者であるとき", group: "A" },
       { num: 3, text: "一般被保険者又は短期雇用特例被保険者であるとき", group: "A" },
       { num: 4, text: "一般被保険者又は日雇労働被保険者であるとき", group: "A" },
-      // B群
       { num: 5, text: "1", group: "B" },
       { num: 6, text: "2", group: "B" },
       { num: 7, text: "3", group: "B" },
       { num: 8, text: "4", group: "B" },
-      // C群
       { num: 9, text: "14", group: "C" },
       { num: 10, text: "21", group: "C" },
       { num: 11, text: "28", group: "C" },
       { num: 12, text: "30", group: "C" },
-      // D群
       { num: 13, text: "30", group: "D" },
       { num: 14, text: "60", group: "D" },
       { num: 15, text: "90", group: "D" },
       { num: 16, text: "120", group: "D" },
-      // E群
       { num: 17, text: "一般被保険者", group: "E" },
       { num: 18, text: "高年齢被保険者", group: "E" },
       { num: 19, text: "雇用保険法の適用除外", group: "E" },
       { num: 20, text: "短期雇用特例被保険者", group: "E" }
     ],
-    // 雇用保険の選択式はABCDE群でそれぞれ1〜4の番号なので正解をgroup判定用に変換
-    // correctは上で「各群内での選択肢番号」を表す
     reference: "雇用保険法 第61条の8・第37条の5・第24条の2"
   }
 ];
 
-// R5の選択式は空
 DATA.r5.sentaku = [];
 
 // =================================
@@ -822,7 +849,7 @@ let state = {
   bookmarks: [],
   examHistory: [],
   sentakuHistory: [],
-  currentYear: 'r6'  // デフォルトは最新年度
+  currentYear: 'r6'
 };
 let session = { questions: [], index: 0, correct: 0, answered: false, wrongIds: [] };
 let examSession = null;
@@ -903,10 +930,11 @@ function renderHome() {
       <div class="hero-sub">STEP BY STEP</div>
     </div>
 
-    <div class="year-tabs">
-      ${YEARS.map(y => `
-        <button class="year-tab ${state.currentYear === y.id ? 'active' : ''}" onclick="switchYear('${y.id}')">${y.name}</button>
-      `).join('')}
+    <div class="year-select-wrap">
+      <div class="year-select-label">出題年度</div>
+      <select class="year-select" onchange="switchYear(this.value)">
+        ${YEARS.map(y => `<option value="${y.id}" ${state.currentYear === y.id ? 'selected' : ''}>${y.full}</option>`).join('')}
+      </select>
     </div>
 
     <div class="stats">
@@ -946,6 +974,7 @@ function renderHome() {
       <div class="section-label">学習モード</div>
       <div class="mode-grid">
         <button class="mode-btn" onclick="startMode('all')"><span class="mode-icon mincho">全</span><div class="mode-title">全問ランダム</div><div class="mode-desc">この年度の全肢</div></button>
+        <button class="mode-btn" onclick="openRangeModal()"><span class="mode-icon mincho">範</span><div class="mode-title">年度横断ランダム</div><div class="mode-desc">複数年度から出題</div></button>
         <button class="mode-btn" onclick="startMode('wrong')"><span class="mode-icon mincho">復</span><div class="mode-title">誤答の復習</div><div class="mode-desc">間違えた問題のみ</div></button>
         <button class="mode-btn" onclick="startMode('bookmark')"><span class="mode-icon mincho" style="color:var(--pin)">栞</span><div class="mode-title">付箋の問題</div><div class="mode-desc">印をつけた問題</div></button>
         <button class="mode-btn" onclick="startMode('unsolved')"><span class="mode-icon mincho">未</span><div class="mode-title">未回答</div><div class="mode-desc">まだ解いていない</div></button>
@@ -1073,13 +1102,26 @@ function renderQuestion() {
   if (state.bookmarks.includes(q.id)) { bmBtn.classList.add('active'); bmBtn.textContent = '★'; }
   else { bmBtn.classList.remove('active'); bmBtn.textContent = '☆'; }
 
+  let contextText = q.context || '';
+  if (contextText) {
+    const splitIdx = contextText.search(/\n\nア\s|ア　/);
+    if (splitIdx > 0) contextText = contextText.substring(0, splitIdx);
+    contextText = contextText.trim();
+  }
+  const contextHtml = contextText ? `
+    <div class="question-context">
+      <div class="question-context-label">問題文・前提</div>
+      ${contextText.replace(/\n/g, '<br>')}
+    </div>
+  ` : '';
+
   const body = document.getElementById('quizBody');
   body.innerHTML = `
     <div class="meta-row">
       <span class="tag accent">${q.subjectName}</span>
       <span class="tag">${q.year}・${q.qNumber} ${q.choice}</span>
     </div>
-    ${q.context ? `<div class="question-context"><div class="question-context-label">前提</div>${q.context}</div>` : ''}
+    ${contextHtml}
     <div class="question-text mincho">${q.question}</div>
     <div class="answer-area">
       <button class="answer-btn" data-value="true" onclick="answer(true)"><span class="sym mincho">○</span><span class="lbl">TADASHII</span></button>
@@ -1091,9 +1133,9 @@ function renderQuestion() {
       <div class="explanation-label">解説</div>
       <div class="explanation" id="explanation"></div>
       <div class="reference mincho" id="reference"></div>
+      <button class="next-btn mincho" id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
     </div>
   `;
-  document.getElementById('nextBtn').classList.remove('show');
   body.scrollTo(0, 0);
 }
 
@@ -1133,8 +1175,9 @@ function answer(userAnswer) {
   document.getElementById('explanation').textContent = q.explanation;
   document.getElementById('reference').textContent = q.reference;
   document.getElementById('resultPanel').classList.add('show');
-  document.getElementById('nextBtn').classList.add('show');
-  document.getElementById('nextBtn').textContent = session.index === session.questions.length - 1 ? '結果を見る' : '次の問題へ';
+  const nb = document.getElementById('nextBtn');
+  nb.classList.add('show');
+  nb.textContent = session.index === session.questions.length - 1 ? '結果を見る' : '次の問題へ';
   document.getElementById('progressFill').style.width = `${((session.index + 1) / session.questions.length) * 100}%`;
 }
 
@@ -1210,12 +1253,13 @@ function renderExamQuestion() {
   document.getElementById('examProgressBtn').textContent = `${examSession.index + 1} / ${examSession.questions.length}`;
 
   const body = document.getElementById('examBody');
+  // 修正箇所：JSエラー防止のためイベントハンドラにeventを明示的に渡す
   body.innerHTML = `
     <div class="exam-q-title mincho">${q.year}年度 ${q.subjectName} ${q.qNumber}</div>
     <div class="exam-q-instruction mincho">${q.instruction.replace(/\n/g, '<br>')}</div>
     <div class="choice-list">
       ${q.choices.map(c => `
-        <button class="choice-item ${selected === c.label ? 'selected' : ''}" onclick="selectChoice('${c.label}')">
+        <button class="choice-item ${selected === c.label ? 'selected' : ''}" onclick="selectChoice('${c.label}', event)">
           <span class="choice-label">${c.label}</span>${c.text}
         </button>
       `).join('')}
@@ -1224,16 +1268,19 @@ function renderExamQuestion() {
       <button class="exam-nav-btn" onclick="examPrev()" ${examSession.index === 0 ? 'disabled' : ''}>← 前の問題</button>
       <button class="exam-nav-btn primary" onclick="examNext()" ${examSession.index === examSession.questions.length - 1 ? 'disabled' : ''}>次の問題 →</button>
     </div>
+    <button class="sentaku-submit-inline mincho" style="margin: 18px 0 0; width: 100%;" onclick="confirmSubmitExam()">採点する</button>
   `;
   body.scrollTo(0, 0);
-  document.getElementById('examSubmitBtn').classList.add('show');
 }
 
-function selectChoice(label) {
+// 修正箇所：引数にeventを追加してブラウザ差異によるエラーを防止
+function selectChoice(label, event) {
   const q = examSession.questions[examSession.index];
   examSession.answers[q.id] = label;
   document.querySelectorAll('#exam .choice-item').forEach(el => el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('selected');
+  }
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
@@ -1288,7 +1335,6 @@ function submitExam() {
   let correct = 0;
   examSession.questions.forEach(q => {
     const userAns = examSession.answers[q.id];
-    // 複数正解対応：correctLabelが"C"のみだが、choicesでcorrect:trueのものも考慮
     const correctLabels = q.choices.filter(c => c.correct).map(c => c.label);
     if (correctLabels.includes(userAns)) correct++;
   });
@@ -1377,7 +1423,6 @@ function showExamDetail(qid) {
     <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-family:'Shippori Mincho',serif;font-size:12px;color:var(--accent);letter-spacing:0.05em">§ ${q.reference}</div>
     <div class="exam-nav" style="margin-top:20px"><button class="exam-nav-btn" onclick="backToExamResult()">← 結果に戻る</button></div>
   `;
-  document.getElementById('examSubmitBtn').classList.remove('show');
   document.getElementById('examFlagBtn').style.display = 'none';
   document.getElementById('examProgressBtn').style.display = 'none';
   if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
@@ -1402,6 +1447,111 @@ function retryExam() {
 }
 
 // =================================
+// 年度横断ランダムモード
+// =================================
+let rangeState = {
+  fromYearIdx: 0,
+  toYearIdx: YEARS.length - 1,
+  subjects: {}
+};
+
+function openRangeModal() {
+  if (Object.keys(rangeState.subjects).length === 0) {
+    SUBJECTS.forEach(s => { rangeState.subjects[s.id] = true; });
+  }
+  rangeState.fromYearIdx = YEARS.length - 1;
+  rangeState.toYearIdx = 0;
+  renderRangeModal();
+  document.getElementById('rangeOverlay').classList.add('show');
+}
+
+function closeRangeModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('rangeOverlay').classList.remove('show');
+}
+
+function renderRangeModal() {
+  const fromIdx = Math.max(rangeState.fromYearIdx, rangeState.toYearIdx);
+  const toIdx = Math.min(rangeState.fromYearIdx, rangeState.toYearIdx);
+  const includedYears = YEARS.slice(toIdx, fromIdx + 1).map(y => y.id);
+  const includedSubjects = Object.keys(rangeState.subjects).filter(id => rangeState.subjects[id]);
+
+  let totalCount = 0;
+  includedYears.forEach(yid => {
+    (DATA[yid]?.questions || []).forEach(q => {
+      if (includedSubjects.includes(q.subject)) totalCount++;
+    });
+  });
+
+  const body = document.getElementById('rangeBody');
+  body.innerHTML = `
+    <div class="range-modal-content">
+      <div class="range-row">
+        <div class="range-row-label">年度範囲</div>
+        <div class="range-selects">
+          <select class="range-select" onchange="rangeState.fromYearIdx = parseInt(this.value); renderRangeModal()">
+            ${YEARS.map((y, i) => `<option value="${i}" ${rangeState.fromYearIdx === i ? 'selected' : ''}>${y.name}</option>`).join('')}
+          </select>
+          <span class="range-tilde">〜</span>
+          <select class="range-select" onchange="rangeState.toYearIdx = parseInt(this.value); renderRangeModal()">
+            ${YEARS.map((y, i) => `<option value="${i}" ${rangeState.toYearIdx === i ? 'selected' : ''}>${y.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="range-row">
+        <div class="range-row-label" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>出題科目</span>
+          <span style="display:flex;gap:10px;">
+            <button onclick="toggleAllSubjects(true)" style="background:none;border:none;color:var(--accent);font-size:10px;cursor:pointer;font-family:inherit;letter-spacing:0.1em;">全て選択</button>
+            <button onclick="toggleAllSubjects(false)" style="background:none;border:none;color:var(--ink-soft);font-size:10px;cursor:pointer;font-family:inherit;letter-spacing:0.1em;">全て解除</button>
+          </span>
+        </div>
+        <div class="range-check-list">
+          ${SUBJECTS.map(s => `
+            <div class="range-check-item ${rangeState.subjects[s.id] ? 'checked' : ''}" onclick="toggleRangeSubject('${s.id}')">
+              <span class="cb"></span>
+              <span>${s.name}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="range-info mincho">
+        対象問題数：${totalCount} 肢<br>
+        範囲：${YEARS[fromIdx].name} 〜 ${YEARS[toIdx].name}
+      </div>
+      <button class="range-start-btn mincho" onclick="startRangeMode()" ${totalCount === 0 ? 'disabled' : ''}>演習開始（ランダム出題）</button>
+    </div>
+  `;
+}
+
+function toggleRangeSubject(id) {
+  rangeState.subjects[id] = !rangeState.subjects[id];
+  renderRangeModal();
+}
+function toggleAllSubjects(val) {
+  SUBJECTS.forEach(s => { rangeState.subjects[s.id] = val; });
+  renderRangeModal();
+}
+
+function startRangeMode() {
+  const fromIdx = Math.max(rangeState.fromYearIdx, rangeState.toYearIdx);
+  const toIdx = Math.min(rangeState.fromYearIdx, rangeState.toYearIdx);
+  const includedYears = YEARS.slice(toIdx, fromIdx + 1).map(y => y.id);
+  const includedSubjects = Object.keys(rangeState.subjects).filter(id => rangeState.subjects[id]);
+
+  let allQs = [];
+  includedYears.forEach(yid => {
+    (DATA[yid]?.questions || []).forEach(q => {
+      if (includedSubjects.includes(q.subject)) allQs.push(q);
+    });
+  });
+
+  if (allQs.length === 0) { alert('対象問題がありません'); return; }
+  closeRangeModal();
+  startQuiz(shuffle(allQs));
+}
+
+// =================================
 // 選択式モード
 // =================================
 function startSentaku(subjectId) {
@@ -1410,8 +1560,8 @@ function startSentaku(subjectId) {
   sentakuSession = {
     subjectId,
     subjectName: SUBJECTS.find(s => s.id === subjectId).name,
-    item: items[0], // 1科目につき1セット
-    answers: {},    // { label: choiceNum }
+    item: items[0],
+    answers: {},
     startTime: Date.now(),
     submitted: false,
     reviewing: false
@@ -1442,7 +1592,6 @@ function renderSentaku() {
   const answers = s.answers;
   const body = document.getElementById('sentakuBody');
 
-  // 本文をレンダリング（空欄を置換）
   const renderPassage = (text) => {
     return text.replace(/\{([A-E])\}/g, (match, label) => {
       const filled = answers[label] !== undefined;
@@ -1458,7 +1607,6 @@ function renderSentaku() {
       let content;
       if (filled) {
         const cn = answers[label];
-        // 雇用のgroup対応と労災を区別
         const choice = item.choices.find(c => c.num === cn && (!c.group || c.group === label));
         content = choice ? choice.text : `(${cn})`;
       } else {
@@ -1475,15 +1623,12 @@ function renderSentaku() {
     </div>
   `).join('');
 
-  // 採点済のときは選択肢を非表示、解説を表示
   let choicesHtml = '';
   if (!s.submitted) {
-    // 雇用保険の場合はgroupで絞る、労災の場合は全選択肢から
     let shownChoices = item.choices;
     if (activeBlankLabel && item.choices.some(c => c.group)) {
       shownChoices = item.choices.filter(c => c.group === activeBlankLabel);
     }
-    // 既に使用されている選択肢（同じ群内）を判定
     const usedNums = Object.entries(answers)
       .filter(([l, _]) => l !== activeBlankLabel)
       .map(([_, n]) => n);
@@ -1495,7 +1640,7 @@ function renderSentaku() {
         </div>
         <div class="sentaku-choices">
           ${activeBlankLabel ? shownChoices.map(c => {
-            const used = usedNums.includes(c.num) && (!c.group); // groupあり(雇用)なら重複OK
+            const used = usedNums.includes(c.num) && (!c.group);
             return `
               <button class="sentaku-choice ${used ? 'used' : ''}" ${used ? 'disabled' : ''} onclick="pickChoice(${c.num})">
                 <span class="sc-num">${c.num}</span>${c.text}
@@ -1503,6 +1648,7 @@ function renderSentaku() {
             `;
           }).join('') : '<div style="padding: 10px 22px; font-size: 11.5px; color: var(--ink-faint);">文中の空欄（A〜E）をタップしてください</div>'}
         </div>
+        <button class="sentaku-submit-inline mincho" onclick="confirmSubmitSentaku()">採点する</button>
       </div>
     `;
   }
@@ -1513,10 +1659,6 @@ function renderSentaku() {
   `;
 
   body.innerHTML = instructionInfo + `<div class="sentaku-text">${passagesHtml}</div>` + choicesHtml;
-
-  // 未採点時のみ採点ボタン表示
-  if (!s.submitted) document.getElementById('sentakuSubmitBtn').classList.add('show');
-  else document.getElementById('sentakuSubmitBtn').classList.remove('show');
 }
 
 function selectBlank(label) {
@@ -1528,7 +1670,6 @@ function selectBlank(label) {
 function pickChoice(num) {
   if (!activeBlankLabel) return;
   sentakuSession.answers[activeBlankLabel] = num;
-  // 自動的に次の空欄へ
   const order = ['A','B','C','D','E'];
   const nextLabel = order.find(l => l !== activeBlankLabel && sentakuSession.answers[l] === undefined);
   activeBlankLabel = nextLabel || null;
